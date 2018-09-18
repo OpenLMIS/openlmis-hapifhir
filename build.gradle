@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE"
     }
 }
 
@@ -33,20 +33,46 @@ repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
+configurations.all {
+    resolutionStrategy {
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == "org.springframework") {
+                details.useVersion "5.0.6.RELEASE"
+            }
+        }
+    }
+}
+
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
-    compile "org.springframework.boot:spring-boot-starter-data-rest"
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
-    compile "org.postgresql:postgresql:9.4.1208"
+    compile "org.postgresql:postgresql:42.0.0"
+
     compile "com.github.tomakehurst:wiremock:1.58"
     compile "org.springframework:spring-test"
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.openlmis:openlmis-service-util:3.0.0'
     compile 'org.apache.commons:commons-lang3:3.5'
-    compile 'org.javers:javers-spring-boot-starter-sql:2.8.1'
     compile 'org.flywaydb:flyway-core:4.0.3'
     compile "org.springframework.security.oauth:spring-security-oauth2"
+
+    compile group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.9.RELEASE'
+
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-base', version:'3.4.0'
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-jpaserver-base', version:'3.4.0'
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-client-okhttp', version:'3.4.0'
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-jaxrsserver-base', version:'3.4.0'
+    compile group: 'org.apache.commons', name: 'commons-dbcp2', version:'2.1.1'
+
+
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.6'
+
+    compile group: 'org.springframework', name: 'spring-orm', version: '5.0.6.RELEASE'
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.6.Final'
+    compile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.3.6.Final'
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"

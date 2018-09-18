@@ -13,10 +13,12 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template;
+package org.openlmis.hapifhir;
 
 import java.util.List;
-import org.openlmis.template.util.Pagination;
+
+import org.openlmis.hapifhir.util.Pagination;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +27,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
 @Configuration
 public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
@@ -44,7 +47,8 @@ public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     registry.addResourceHandler("/template/webjars/**")
-        .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        .addResourceLocations("classpath:/META-INF/resources/webjars/")
+        .resourceChain(true).addResolver(new PathResourceResolver());
     super.addResourceHandlers(registry);
   }
 
