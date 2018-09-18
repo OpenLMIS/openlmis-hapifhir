@@ -102,7 +102,7 @@ pipeline {
                 }
             }
             steps {
-                build job: 'OpenLMIS-hapifhir-deploy-to-test', wait: false
+                build job: 'OpenLMIS-3.x-deploy-to-test', wait: false
             }
             post {
                 failure {
