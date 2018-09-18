@@ -28,7 +28,7 @@ services:
     env_file: .env
   image:
     build: .
-    image: openlmis/template-service
+    image: openlmis/hapifhir
   db:
     image: openlmis/postgres:9.6
     env_file: .env

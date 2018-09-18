@@ -1,6 +1,6 @@
 version: "2"
 services:
-  template-service:
+  hapifhir:
     image: openlmis/dev:3
     ports:
       - "5005:5005"

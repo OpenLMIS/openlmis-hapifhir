@@ -1,8 +1,8 @@
 version: "2"
 services:
 
-  template-service:
-    image: openlmis/template-service
+  hapifhir:
+    image: openlmis/hapifhir
     links:
       - db
       - log
