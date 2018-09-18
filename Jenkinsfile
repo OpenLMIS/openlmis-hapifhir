@@ -78,23 +78,6 @@ pipeline {
                 }
             }
         }
-        stage('Build demo-data') {
-            when {
-                expression {
-                    return CURRENT_BRANCH == 'master'
-                }
-            }
-            steps {
-                build job: "OpenLMIS-3.x-build-demo-data-pipeline"
-            }
-            post {
-                failure {
-                    script {
-                        notifyAfterFailure()
-                    }
-                }
-            }
-        }
         stage('Deploy to test') {
             when {
                 expression {
