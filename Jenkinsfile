@@ -17,9 +17,6 @@ pipeline {
     environment {
         COMPOSE_PROJECT_NAME = "hapifhir${BRANCH_NAME}"
     }
-    parameters {
-
-    }
     stages {
         stage('Preparation') {
             agent any
