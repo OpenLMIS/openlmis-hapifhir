@@ -8,8 +8,6 @@ CREATE TABLE hfj_forced_id (
 );
 
 
-ALTER TABLE hfj_forced_id OWNER TO postgres;
-
 --
 -- Name: hfj_history_tag; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -22,9 +20,6 @@ CREATE TABLE hfj_history_tag (
     res_ver_pid bigint NOT NULL
 );
 
-
-ALTER TABLE hfj_history_tag OWNER TO postgres;
-
 --
 -- Name: hfj_idx_cmp_string_uniq; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -35,8 +30,6 @@ CREATE TABLE hfj_idx_cmp_string_uniq (
     res_id bigint
 );
 
-
-ALTER TABLE hfj_idx_cmp_string_uniq OWNER TO postgres;
 
 --
 -- Name: hfj_res_link; Type: TABLE; Schema: public; Owner: postgres
@@ -53,9 +46,6 @@ CREATE TABLE hfj_res_link (
     sp_updated timestamp without time zone
 );
 
-
-ALTER TABLE hfj_res_link OWNER TO postgres;
-
 --
 -- Name: hfj_res_param_present; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -67,9 +57,6 @@ CREATE TABLE hfj_res_param_present (
     sp_id bigint NOT NULL
 );
 
-
-ALTER TABLE hfj_res_param_present OWNER TO postgres;
-
 --
 -- Name: hfj_res_tag; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -80,9 +67,6 @@ CREATE TABLE hfj_res_tag (
     res_id bigint,
     res_type character varying(30) NOT NULL
 );
-
-
-ALTER TABLE hfj_res_tag OWNER TO postgres;
 
 --
 -- Name: hfj_res_ver; Type: TABLE; Schema: public; Owner: postgres
@@ -102,9 +86,6 @@ CREATE TABLE hfj_res_ver (
     res_ver bigint NOT NULL,
     forced_id_pid bigint
 );
-
-
-ALTER TABLE hfj_res_ver OWNER TO postgres;
 
 --
 -- Name: hfj_resource; Type: TABLE; Schema: public; Owner: postgres
@@ -135,9 +116,6 @@ CREATE TABLE hfj_resource (
     forced_id_pid bigint
 );
 
-
-ALTER TABLE hfj_resource OWNER TO postgres;
-
 --
 -- Name: hfj_search; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -162,9 +140,6 @@ CREATE TABLE hfj_search (
     search_uuid character varying(40) NOT NULL
 );
 
-
-ALTER TABLE hfj_search OWNER TO postgres;
-
 --
 -- Name: hfj_search_include; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -177,9 +152,6 @@ CREATE TABLE hfj_search_include (
     search_pid bigint NOT NULL
 );
 
-
-ALTER TABLE hfj_search_include OWNER TO postgres;
-
 --
 -- Name: hfj_search_parm; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -189,9 +161,6 @@ CREATE TABLE hfj_search_parm (
     param_name character varying(100) NOT NULL,
     res_type character varying(30) NOT NULL
 );
-
-
-ALTER TABLE hfj_search_parm OWNER TO postgres;
 
 --
 -- Name: hfj_search_result; Type: TABLE; Schema: public; Owner: postgres
@@ -203,9 +172,6 @@ CREATE TABLE hfj_search_result (
     resource_pid bigint NOT NULL,
     search_pid bigint NOT NULL
 );
-
-
-ALTER TABLE hfj_search_result OWNER TO postgres;
 
 --
 -- Name: hfj_spidx_coords; Type: TABLE; Schema: public; Owner: postgres
@@ -222,9 +188,6 @@ CREATE TABLE hfj_spidx_coords (
     sp_longitude double precision
 );
 
-
-ALTER TABLE hfj_spidx_coords OWNER TO postgres;
-
 --
 -- Name: hfj_spidx_date; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -240,9 +203,6 @@ CREATE TABLE hfj_spidx_date (
     sp_value_low timestamp without time zone
 );
 
-
-ALTER TABLE hfj_spidx_date OWNER TO postgres;
-
 --
 -- Name: hfj_spidx_number; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -257,8 +217,6 @@ CREATE TABLE hfj_spidx_number (
     sp_value numeric(19,2)
 );
 
-
-ALTER TABLE hfj_spidx_number OWNER TO postgres;
 
 --
 -- Name: hfj_spidx_quantity; Type: TABLE; Schema: public; Owner: postgres
@@ -278,9 +236,6 @@ CREATE TABLE hfj_spidx_quantity (
     sp_value numeric(19,2)
 );
 
-
-ALTER TABLE hfj_spidx_quantity OWNER TO postgres;
-
 --
 -- Name: hfj_spidx_string; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -297,9 +252,6 @@ CREATE TABLE hfj_spidx_string (
     sp_value_exact character varying(200),
     sp_value_normalized character varying(200)
 );
-
-
-ALTER TABLE hfj_spidx_string OWNER TO postgres;
 
 --
 -- Name: hfj_spidx_token; Type: TABLE; Schema: public; Owner: postgres
@@ -319,9 +271,6 @@ CREATE TABLE hfj_spidx_token (
     sp_value character varying(200)
 );
 
-
-ALTER TABLE hfj_spidx_token OWNER TO postgres;
-
 --
 -- Name: hfj_spidx_uri; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -337,9 +286,6 @@ CREATE TABLE hfj_spidx_uri (
     sp_uri character varying(255)
 );
 
-
-ALTER TABLE hfj_spidx_uri OWNER TO postgres;
-
 --
 -- Name: hfj_subscription_stats; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -350,8 +296,6 @@ CREATE TABLE hfj_subscription_stats (
     res_id bigint
 );
 
-
-ALTER TABLE hfj_subscription_stats OWNER TO postgres;
 
 --
 -- Name: hfj_tag_def; Type: TABLE; Schema: public; Owner: postgres
@@ -366,8 +310,6 @@ CREATE TABLE hfj_tag_def (
 );
 
 
-ALTER TABLE hfj_tag_def OWNER TO postgres;
-
 --
 -- Name: seq_cncpt_map_grp_elm_tgt_pid; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -379,8 +321,6 @@ CREATE SEQUENCE seq_cncpt_map_grp_elm_tgt_pid
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_cncpt_map_grp_elm_tgt_pid OWNER TO postgres;
 
 --
 -- Name: seq_codesystem_pid; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -394,8 +334,6 @@ CREATE SEQUENCE seq_codesystem_pid
     CACHE 1;
 
 
-ALTER TABLE seq_codesystem_pid OWNER TO postgres;
-
 --
 -- Name: seq_codesystemver_pid; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -407,9 +345,6 @@ CREATE SEQUENCE seq_codesystemver_pid
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_codesystemver_pid OWNER TO postgres;
-
 --
 -- Name: seq_concept_desig_pid; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -420,9 +355,6 @@ CREATE SEQUENCE seq_concept_desig_pid
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_concept_desig_pid OWNER TO postgres;
 
 --
 -- Name: seq_concept_map_group_pid; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -436,8 +368,6 @@ CREATE SEQUENCE seq_concept_map_group_pid
     CACHE 1;
 
 
-ALTER TABLE seq_concept_map_group_pid OWNER TO postgres;
-
 --
 -- Name: seq_concept_map_grp_elm_pid; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -449,8 +379,6 @@ CREATE SEQUENCE seq_concept_map_grp_elm_pid
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_concept_map_grp_elm_pid OWNER TO postgres;
 
 --
 -- Name: seq_concept_map_pid; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -464,8 +392,6 @@ CREATE SEQUENCE seq_concept_map_pid
     CACHE 1;
 
 
-ALTER TABLE seq_concept_map_pid OWNER TO postgres;
-
 --
 -- Name: seq_concept_pc_pid; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -477,8 +403,6 @@ CREATE SEQUENCE seq_concept_pc_pid
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_concept_pc_pid OWNER TO postgres;
 
 --
 -- Name: seq_concept_pid; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -492,8 +416,6 @@ CREATE SEQUENCE seq_concept_pid
     CACHE 1;
 
 
-ALTER TABLE seq_concept_pid OWNER TO postgres;
-
 --
 -- Name: seq_concept_prop_pid; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -504,9 +426,6 @@ CREATE SEQUENCE seq_concept_prop_pid
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_concept_prop_pid OWNER TO postgres;
 
 --
 -- Name: seq_forcedid_id; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -519,9 +438,6 @@ CREATE SEQUENCE seq_forcedid_id
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_forcedid_id OWNER TO postgres;
-
 --
 -- Name: seq_historytag_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -532,9 +448,6 @@ CREATE SEQUENCE seq_historytag_id
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_historytag_id OWNER TO postgres;
 
 --
 -- Name: seq_idxcmpstruniq_id; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -547,9 +460,6 @@ CREATE SEQUENCE seq_idxcmpstruniq_id
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_idxcmpstruniq_id OWNER TO postgres;
-
 --
 -- Name: seq_reslink_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -560,9 +470,6 @@ CREATE SEQUENCE seq_reslink_id
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_reslink_id OWNER TO postgres;
 
 --
 -- Name: seq_resource_history_id; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -575,9 +482,6 @@ CREATE SEQUENCE seq_resource_history_id
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_resource_history_id OWNER TO postgres;
-
 --
 -- Name: seq_resource_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -588,9 +492,6 @@ CREATE SEQUENCE seq_resource_id
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_resource_id OWNER TO postgres;
 
 --
 -- Name: seq_resparmpresent_id; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -603,9 +504,6 @@ CREATE SEQUENCE seq_resparmpresent_id
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_resparmpresent_id OWNER TO postgres;
-
 --
 -- Name: seq_restag_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -616,9 +514,6 @@ CREATE SEQUENCE seq_restag_id
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_restag_id OWNER TO postgres;
 
 --
 -- Name: seq_search; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -631,9 +526,6 @@ CREATE SEQUENCE seq_search
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_search OWNER TO postgres;
-
 --
 -- Name: seq_search_inc; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -644,9 +536,6 @@ CREATE SEQUENCE seq_search_inc
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE seq_search_inc OWNER TO postgres;
 
 --
 -- Name: seq_search_res; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -660,8 +549,6 @@ CREATE SEQUENCE seq_search_res
     CACHE 1;
 
 
-ALTER TABLE seq_search_res OWNER TO postgres;
-
 --
 -- Name: seq_searchparm_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -673,8 +560,6 @@ CREATE SEQUENCE seq_searchparm_id
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_searchparm_id OWNER TO postgres;
 
 --
 -- Name: seq_spidx_coords; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -688,8 +573,6 @@ CREATE SEQUENCE seq_spidx_coords
     CACHE 1;
 
 
-ALTER TABLE seq_spidx_coords OWNER TO postgres;
-
 --
 -- Name: seq_spidx_date; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -701,8 +584,6 @@ CREATE SEQUENCE seq_spidx_date
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_spidx_date OWNER TO postgres;
 
 --
 -- Name: seq_spidx_number; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -716,8 +597,6 @@ CREATE SEQUENCE seq_spidx_number
     CACHE 1;
 
 
-ALTER TABLE seq_spidx_number OWNER TO postgres;
-
 --
 -- Name: seq_spidx_quantity; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -729,8 +608,6 @@ CREATE SEQUENCE seq_spidx_quantity
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_spidx_quantity OWNER TO postgres;
 
 --
 -- Name: seq_spidx_string; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -744,8 +621,6 @@ CREATE SEQUENCE seq_spidx_string
     CACHE 1;
 
 
-ALTER TABLE seq_spidx_string OWNER TO postgres;
-
 --
 -- Name: seq_spidx_token; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -757,8 +632,6 @@ CREATE SEQUENCE seq_spidx_token
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_spidx_token OWNER TO postgres;
 
 --
 -- Name: seq_spidx_uri; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -772,8 +645,6 @@ CREATE SEQUENCE seq_spidx_uri
     CACHE 1;
 
 
-ALTER TABLE seq_spidx_uri OWNER TO postgres;
-
 --
 -- Name: seq_subscription_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -786,8 +657,6 @@ CREATE SEQUENCE seq_subscription_id
     CACHE 1;
 
 
-ALTER TABLE seq_subscription_id OWNER TO postgres;
-
 --
 -- Name: seq_tagdef_id; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -799,8 +668,6 @@ CREATE SEQUENCE seq_tagdef_id
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE seq_tagdef_id OWNER TO postgres;
 
 --
 -- Name: trm_codesystem; Type: TABLE; Schema: public; Owner: postgres
@@ -815,8 +682,6 @@ CREATE TABLE trm_codesystem (
 );
 
 
-ALTER TABLE trm_codesystem OWNER TO postgres;
-
 --
 -- Name: trm_codesystem_ver; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -828,8 +693,6 @@ CREATE TABLE trm_codesystem_ver (
     res_id bigint NOT NULL
 );
 
-
-ALTER TABLE trm_codesystem_ver OWNER TO postgres;
 
 --
 -- Name: trm_concept; Type: TABLE; Schema: public; Owner: postgres
@@ -844,8 +707,6 @@ CREATE TABLE trm_concept (
     code_sequence integer
 );
 
-
-ALTER TABLE trm_concept OWNER TO postgres;
 
 --
 -- Name: trm_concept_desig; Type: TABLE; Schema: public; Owner: postgres
@@ -862,8 +723,6 @@ CREATE TABLE trm_concept_desig (
 );
 
 
-ALTER TABLE trm_concept_desig OWNER TO postgres;
-
 --
 -- Name: trm_concept_map; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -876,8 +735,6 @@ CREATE TABLE trm_concept_map (
     url character varying(200) NOT NULL
 );
 
-
-ALTER TABLE trm_concept_map OWNER TO postgres;
 
 --
 -- Name: trm_concept_map_group; Type: TABLE; Schema: public; Owner: postgres
@@ -896,8 +753,6 @@ CREATE TABLE trm_concept_map_group (
 );
 
 
-ALTER TABLE trm_concept_map_group OWNER TO postgres;
-
 --
 -- Name: trm_concept_map_grp_element; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -913,8 +768,6 @@ CREATE TABLE trm_concept_map_grp_element (
     concept_map_group_pid bigint NOT NULL
 );
 
-
-ALTER TABLE trm_concept_map_grp_element OWNER TO postgres;
 
 --
 -- Name: trm_concept_map_grp_elm_tgt; Type: TABLE; Schema: public; Owner: postgres
@@ -933,8 +786,6 @@ CREATE TABLE trm_concept_map_grp_elm_tgt (
 );
 
 
-ALTER TABLE trm_concept_map_grp_elm_tgt OWNER TO postgres;
-
 --
 -- Name: trm_concept_pc_link; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -947,8 +798,6 @@ CREATE TABLE trm_concept_pc_link (
     codesystem_pid bigint NOT NULL
 );
 
-
-ALTER TABLE trm_concept_pc_link OWNER TO postgres;
 
 --
 -- Name: trm_concept_property; Type: TABLE; Schema: public; Owner: postgres
@@ -964,8 +813,6 @@ CREATE TABLE trm_concept_property (
     concept_pid bigint
 );
 
-
-ALTER TABLE trm_concept_property OWNER TO postgres;
 
 
 --
