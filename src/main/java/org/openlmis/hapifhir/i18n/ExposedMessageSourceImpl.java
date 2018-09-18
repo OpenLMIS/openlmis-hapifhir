@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.i18n;
+package org.openlmis.hapifhir.i18n;
 
 import java.util.Enumeration;
 import java.util.HashMap;

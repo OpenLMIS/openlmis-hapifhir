@@ -13,30 +13,13 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.web;
+package org.openlmis.hapifhir.i18n;
 
-import org.openlmis.util.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.Locale;
+import java.util.Map;
+import org.springframework.context.MessageSource;
 
-/**
- * Controller used for displaying service's version information.
- */
-@RestController
-public class VersionController {
+public interface ExposedMessageSource extends MessageSource {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(VersionController.class);
-
-  /**
-   * Displays version information.
-   *
-   * @return {Version} Returns version read from file.
-   */
-  @RequestMapping("/template")
-  public Version display() {
-    LOGGER.debug("Returning version");
-    return new Version();
-  }
+  Map<String, String> getAllMessages(Locale locale);
 }

@@ -13,13 +13,21 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.i18n;
+package org.openlmis.hapifhir.exception;
 
-import java.util.Locale;
-import java.util.Map;
-import org.springframework.context.MessageSource;
+import org.openlmis.hapifhir.util.Message;
 
-public interface ExposedMessageSource extends MessageSource {
+/**
+ * exception for indicating that an entity explicitly asked for wasn't found.  This should result
+ * in a NOT FOUND api response.
+ */
+public class NotFoundException extends BaseMessageException {
 
-  Map<String, String> getAllMessages(Locale locale);
+  public NotFoundException(Message message) {
+    super(message);
+  }
+
+  public NotFoundException(String messageKey) {
+    super(messageKey);
+  }
 }

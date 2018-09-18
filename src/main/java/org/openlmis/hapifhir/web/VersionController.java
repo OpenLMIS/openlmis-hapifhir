@@ -13,21 +13,30 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.exception;
+package org.openlmis.hapifhir.web;
 
-import org.openlmis.template.util.Message;
+import org.openlmis.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * exception for indicating that an entity explicitly asked for wasn't found.  This should result
- * in a NOT FOUND api response.
+ * Controller used for displaying service's version information.
  */
-public class NotFoundException extends BaseMessageException {
+@RestController
+public class VersionController {
 
-  public NotFoundException(Message message) {
-    super(message);
-  }
+  private static final Logger LOGGER = LoggerFactory.getLogger(VersionController.class);
 
-  public NotFoundException(String messageKey) {
-    super(messageKey);
+  /**
+   * Displays version information.
+   *
+   * @return {Version} Returns version read from file.
+   */
+  @RequestMapping("/template")
+  public Version display() {
+    LOGGER.debug("Returning version");
+    return new Version();
   }
 }

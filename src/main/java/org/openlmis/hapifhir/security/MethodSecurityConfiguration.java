@@ -13,40 +13,20 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.exception;
+package org.openlmis.hapifhir.security;
 
-import org.openlmis.template.util.Message;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
+import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
 
-/**
- * Base class for exceptions using Message.
- */
-public class BaseMessageException extends RuntimeException {
-  private final Message message;
+@Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+public class MethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
 
-  public BaseMessageException(Message message) {
-    this.message = message;
-  }
-
-  public BaseMessageException(Message message, Throwable cause) {
-    super(cause);
-    this.message = message;
-  }
-
-  public BaseMessageException(String messageKey) {
-    this.message = new Message(messageKey);
-  }
-
-  public Message asMessage() {
-    return message;
-  }
-
-  /**
-   * Overrides RuntimeException's public String getMessage().
-   *
-   * @return a localized string description
-   */
   @Override
-  public String getMessage() {
-    return this.message.toString();
+  protected MethodSecurityExpressionHandler createExpressionHandler() {
+    return new OAuth2MethodSecurityExpressionHandler();
   }
 }

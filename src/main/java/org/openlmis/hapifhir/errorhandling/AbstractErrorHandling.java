@@ -13,11 +13,11 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.errorhandling;
+package org.openlmis.hapifhir.errorhandling;
 
-import org.openlmis.template.exception.BaseMessageException;
-import org.openlmis.template.i18n.MessageService;
-import org.openlmis.template.util.Message;
+import org.openlmis.hapifhir.exception.BaseMessageException;
+import org.openlmis.hapifhir.i18n.MessageService;
+import org.openlmis.hapifhir.util.Message;
 import org.openlmis.util.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

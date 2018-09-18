@@ -13,10 +13,10 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.errorhandling;
+package org.openlmis.hapifhir.errorhandling;
 
-import org.openlmis.template.exception.NotFoundException;
-import org.openlmis.template.util.Message;
+import org.openlmis.hapifhir.exception.NotFoundException;
+import org.openlmis.hapifhir.util.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

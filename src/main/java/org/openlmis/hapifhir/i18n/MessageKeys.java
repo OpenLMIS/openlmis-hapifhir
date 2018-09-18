@@ -13,20 +13,16 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.security;
+package org.openlmis.hapifhir.i18n;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
-import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
+public abstract class MessageKeys {
+  private static final String SERVICE_PREFIX = "template";
+  private static final String ERROR_PREFIX = SERVICE_PREFIX + ".error";
 
-@Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
-public class MethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
+  public static final String ERROR_NOT_FOUND = ERROR_PREFIX
+      + ".widgetNotFound";
 
-  @Override
-  protected MethodSecurityExpressionHandler createExpressionHandler() {
-    return new OAuth2MethodSecurityExpressionHandler();
+  private MessageKeys() {
+    throw new UnsupportedOperationException();
   }
 }

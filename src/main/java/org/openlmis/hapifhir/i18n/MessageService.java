@@ -13,41 +13,21 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.web;
+package org.openlmis.hapifhir.i18n;
 
-import java.util.Map;
-import org.openlmis.template.i18n.ExposedMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openlmis.hapifhir.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
-@RestController
-public class MessageController {
-
-  Logger logger = LoggerFactory.getLogger(MessageController.class);
+@Service
+public class MessageService {
 
   @Autowired
   private ExposedMessageSource messageSource;
 
-  /**
-   * Returns "hello world" message.
-   *
-   * @return value of template.message.hello
-   */
-  @RequestMapping("/hello")
-  public String hello() {
-    String[] msgArgs = {"world"};
-    logger.debug("Returning hello world message");
-    return messageSource.getMessage("template.message.hello", msgArgs, 
-        LocaleContextHolder.getLocale());
+  public Message.LocalizedMessage localize(Message message) {
+    return message.localMessage(messageSource, LocaleContextHolder.getLocale());
   }
 
-  @RequestMapping("/messages")
-  public Map<String, String> getAllMessages() {
-    logger.info("Returning all messages for current locale");
-    return messageSource.getAllMessages(LocaleContextHolder.getLocale());
-  }
 }

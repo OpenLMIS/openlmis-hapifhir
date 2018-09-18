@@ -13,16 +13,40 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.i18n;
+package org.openlmis.hapifhir.exception;
 
-public abstract class MessageKeys {
-  private static final String SERVICE_PREFIX = "template";
-  private static final String ERROR_PREFIX = SERVICE_PREFIX + ".error";
+import org.openlmis.hapifhir.util.Message;
 
-  public static final String ERROR_NOT_FOUND = ERROR_PREFIX
-      + ".widgetNotFound";
+/**
+ * Base class for exceptions using Message.
+ */
+public class BaseMessageException extends RuntimeException {
+  private final Message message;
 
-  private MessageKeys() {
-    throw new UnsupportedOperationException();
+  public BaseMessageException(Message message) {
+    this.message = message;
+  }
+
+  public BaseMessageException(Message message, Throwable cause) {
+    super(cause);
+    this.message = message;
+  }
+
+  public BaseMessageException(String messageKey) {
+    this.message = new Message(messageKey);
+  }
+
+  public Message asMessage() {
+    return message;
+  }
+
+  /**
+   * Overrides RuntimeException's public String getMessage().
+   *
+   * @return a localized string description
+   */
+  @Override
+  public String getMessage() {
+    return this.message.toString();
   }
 }

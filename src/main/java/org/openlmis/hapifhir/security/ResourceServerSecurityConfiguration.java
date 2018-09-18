@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.template.security;
+package org.openlmis.hapifhir.security;
 
 import java.io.IOException;
 import java.util.Arrays;
