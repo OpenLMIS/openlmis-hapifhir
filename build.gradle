@@ -3,6 +3,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        // the specific version of spring boot is used to make sure that this service
+        // uses the same version of spring boot as the HAPI FHIR.
+        // https://github.com/jamesagnew/hapi-fhir/blob/master/pom.xml#L531-L534
         classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE"
     }
 }
@@ -33,6 +36,8 @@ repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
+// Spring boot loads a different version of spring. However, HAPI FHIR has dependancy on v5.0.6
+// the block of code ensures the right version of spring is used with spring boot.
 configurations.all {
     resolutionStrategy {
         eachDependency { DependencyResolveDetails details ->
@@ -70,6 +75,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:2.9.6'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.6'
 
+    compile 'org.springframework:spring-orm'
     compile 'org.hibernate:hibernate-core:5.3.6.Final'
     compile 'org.hibernate:hibernate-entitymanager:5.3.6.Final'
 

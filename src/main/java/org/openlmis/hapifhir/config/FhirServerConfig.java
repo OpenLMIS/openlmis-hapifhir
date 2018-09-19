@@ -25,7 +25,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
 
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -62,9 +61,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
   @Bean()
   public DaoConfig daoConfig() {
     DaoConfig retVal = new DaoConfig();
-    retVal.setSubscriptionEnabled(true);
-    retVal.setSubscriptionPollDelay(5000);
-    retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+    retVal.setAllowExternalReferences(true);
     retVal.setAllowMultipleDelete(true);
     return retVal;
   }
@@ -105,8 +102,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
   @Bean
   @ConfigurationProperties("spring.jpa.properties")
   public JpaProperties jpaProperties() {
-    JpaProperties extraProperties = new JpaProperties();
-    return extraProperties;
+    return new JpaProperties();
   }
 
 
