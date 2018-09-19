@@ -17,12 +17,9 @@ package org.openlmis.hapifhir.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-
-import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -33,6 +30,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -46,8 +45,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @PropertySource("classpath:application.properties")
 public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
-  private static final String FALSE = "false";
-
   @Value("${spring.datasource.url}")
   private String databaseUrl;
 
@@ -57,8 +54,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
   @Value("${spring.datasource.password}")
   private String databasePassword;
 
-  @Value("${spring.jpa.properties.hibernate.default_schema}")
-  private String defaultSchema;
 
   /**
    * A bean that configures Dao.
@@ -67,7 +62,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
   @Bean()
   public DaoConfig daoConfig() {
     DaoConfig retVal = new DaoConfig();
-
     retVal.setSubscriptionEnabled(true);
     retVal.setSubscriptionPollDelay(5000);
     retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
@@ -103,30 +97,15 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
     retVal.setDataSource(dataSource());
     retVal.setPackagesToScan("ca.uhn.fhir");
     retVal.setPersistenceProvider(new HibernatePersistenceProvider());
-    retVal.setJpaProperties(jpaProperties());
+    retVal.setJpaPropertyMap(jpaProperties().getProperties());
     return retVal;
   }
 
-  @SuppressWarnings("")
-  private Properties jpaProperties() {
-    Properties extraProperties = new Properties();
-    extraProperties.put("hibernate.dialect", org.hibernate.dialect.PostgresPlusDialect
-        .class.getName());
-    extraProperties.put("hibernate.format_sql", "true");
-    extraProperties.put("hibernate.show_sql", FALSE);
-    extraProperties.put("hibernate.naming-strategy", "org.hibernate.cfg.ImprovedNamingStrategy");
-    extraProperties.put("hibernate.hbm2ddl.auto", "update");
-    extraProperties.put("hibernate.jdbc.batch_size", "20");
-    extraProperties.put("hibernate.cache.use_query_cache", FALSE);
-    extraProperties.put("hibernate.cache.use_second_level_cache", FALSE);
-    extraProperties.put("hibernate.cache.use_structured_entries", FALSE);
-    extraProperties.put("hibernate.cache.use_minimal_puts", FALSE);
-    extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory
-        .class.getName());
-    extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
-    extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
-    extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-    extraProperties.put("hibernate.default_schema", defaultSchema);
+
+  @Bean
+  @ConfigurationProperties("spring.jpa.properties")
+  public JpaProperties jpaProperties() {
+    JpaProperties extraProperties = new JpaProperties();
     return extraProperties;
   }
 

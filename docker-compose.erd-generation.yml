@@ -17,4 +17,4 @@ services:
   log:
     image: openlmis/rsyslog:1
     volumes:
-      - '../logs/template-service:/var/log'
+      - '../logs/hapifhir-service:/var/log'

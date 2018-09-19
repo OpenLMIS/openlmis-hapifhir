@@ -7,7 +7,7 @@ protocols: [ HTTP, HTTPS ]
 
 documentation:
     - title: Getting Started
-      content: Welcome to the OpenLMIS template-service documentation. This minimal API is intended for illustrative purposes.
+      content: Welcome to the OpenLMIS hapifhir-service documentation. This minimal API is intended for illustrative purposes.
 
 schemas:
   - auditLogEntry: !include schemas/auditLogEntry.json
@@ -105,7 +105,7 @@ resourceTypes:
                 type: string
                 required: true
                 repeat: false
-/template:
+/hapifhir:
     displayName: Version
     get:
         description: Get version
@@ -119,25 +119,3 @@ resourceTypes:
               application/json:
                 schema: version
 
-    /widgets:
-      displayName: widgets
-      get:
-        responses:
-          200:
-      /{id}:
-        uriParameters:
-          id:
-            displayName: id
-            type: string
-            required: true
-            repeat: false
-        delete:
-          responses:
-        get:
-          responses:
-        put:
-          responses:
-        post:
-          responses:
-      /{id}/auditLog:
-        type: instanceAuditLog
