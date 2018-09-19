@@ -95,40 +95,35 @@ pipeline {
                 }
             }
         }
-        stage('Parallel: Sonar analysis') {
-            parallel {
-                stage('Sonar analysis') {
-                    agent any
-                    environment {
-                        PATH = "/usr/local/bin/:$PATH"
-                    }
-                    steps {
-                        withSonarQubeEnv('Sonar OpenLMIS') {
-                            withCredentials([string(credentialsId: 'SONAR_LOGIN', variable: 'SONAR_LOGIN'), string(credentialsId: 'SONAR_PASSWORD', variable: 'SONAR_PASSWORD')]) {
-                                sh(script: "./ci-sonarAnalysis.sh")
+        stage('Sonar analysis') {
+            agent any
+            environment {
+                PATH = "/usr/local/bin/:$PATH"
+            }
+            steps {
+                withSonarQubeEnv('Sonar OpenLMIS') {
+                    withCredentials([string(credentialsId: 'SONAR_LOGIN', variable: 'SONAR_LOGIN'), string(credentialsId: 'SONAR_PASSWORD', variable: 'SONAR_PASSWORD')]) {
+                        sh(script: "./ci-sonarAnalysis.sh")
 
-                                // workaround: Sonar plugin retrieves the path directly from the output
-                                sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
-                            }
-                        }
-                        timeout(time: 1, unit: 'HOURS') {
-                            script {
-                                def gate = waitForQualityGate()
-                                if (gate.status != 'OK') {
-                                    error 'Quality Gate FAILED'
-                                }
-                            }
-                        }
+                        // workaround: Sonar plugin retrieves the path directly from the output
+                        sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
                     }
-                    post {
-                        failure {
-                            script {
-                                notifyAfterFailure()
-                            }
+                }
+                timeout(time: 1, unit: 'HOURS') {
+                    script {
+                        def gate = waitForQualityGate()
+                        if (gate.status != 'OK') {
+                            error 'Quality Gate FAILED'
                         }
                     }
                 }
-
+            }
+            post {
+                failure {
+                    script {
+                        notifyAfterFailure()
+                    }
+                }
             }
         }
 
