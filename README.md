@@ -1,6 +1,6 @@
-# OpenLMIS Service Template
-This template is meant to be a starting point for developing a new 
-OpenLMIS 3.x Independent Service.
+# OpenLMIS HAPI FHIR service
+
+This repository contains openlmis-hapifhir service. 
 
 ## Prerequisites
 * Docker 1.11+
@@ -12,31 +12,24 @@ All other dependencies, such as Java, are delivered automatically via the Docker
 1. Fork/clone this repository from GitHub.
 
  ```shell
- git clone https://github.com/OpenLMIS/openlmis-template-service.git <openlmis-your-service-name>
+ git clone https://github.com/OpenLMIS/openlmis-hapifhir.git <openlmis-your-service-name>
  ```
-2. Respectively change all instances of `openlmis-template-service` and
-`template-service` within the project to `openlmis-your-service-name` and
-`your-service-name`.
-3. Change all instances of the default version number ("0.0.1") in the project to your
-version number.
-4. Change the gradle build file to add any dependencies 
-(e.g. JPA, PostgreSQL).
-5. Add Java code to the template.
-6. Add an environment file called `.env` to the root folder of the project, with the required 
+
+2. Add an environment file called `.env` to the root folder of the project, with the required 
 project settings and credentials. For a starter environment file, you can use [this 
 one](https://raw.githubusercontent.com/OpenLMIS/openlmis-ref-distro/master/settings-sample.env). e.g.
 
  ```shell
- cd <openlmis-your-service-name>
+ cd openlmis-hapifhir
  curl -o .env -L https://raw.githubusercontent.com/OpenLMIS/openlmis-ref-distro/master/settings-sample.env
  ```
-7. Develop w/ Docker by running `docker-compose run --service-ports <your-service-name>`.
+3. Develop w/ Docker by running `docker-compose run --service-ports <your-service-name>`.
 See [Developing w/ Docker](#devdocker).
-8. You should now be in an interactive shell inside the newly created development 
+4. You should now be in an interactive shell inside the newly created development 
 environment, start the Service with: `gradle bootRun`
-9. Go to `http://<yourDockerIPAddress>:8080/` to see the service name 
+5. Go to `http://<yourDockerIPAddress>:8080/` to see the service name 
 and version. Note that you can determine yourDockerIPAddress by running `docker-machine ip`.
-10. Go to `http://<yourDockerIPAddress>:8080/api/` to see the APIs.
+6. Go to `http://<yourDockerIPAddress>:8080/api/` to see the APIs.
 
 ## <a name="building">Building & Testing</a>
 Gradle is our usual build tool.  This template includes common tasks 
@@ -162,7 +155,7 @@ compose instructions have been provided to demonstrate this.
 4. Run the command below.
 
 ```shell
-> docker-compose -f docker-compose.builder.yml run --service-ports template-service
+> docker-compose -f docker-compose.builder.yml run --service-ports hapifhir
 ```
 
 ### <a name="internationalization">Internationalization (i18n)</a>

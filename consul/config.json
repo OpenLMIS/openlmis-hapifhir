@@ -1,6 +1,6 @@
 {
   "service": {
-    "Name": "openlmis-hapifhir",
+    "Name": "hapifhir",
     "Port": 8080,
     "Tags": ["openlmis-service"]
   },

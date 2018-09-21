@@ -85,10 +85,10 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
     http
         .authorizeRequests()
         .antMatchers(
-            "/template",
+            "/hapifhir",
             "/webjars/**",
-            "/template/webjars/**",
-            "/template/docs/**"
+            "/hapifhir/webjars/**",
+            "/hapifhir/docs/**"
         ).permitAll()
         .antMatchers("/**").fullyAuthenticated();
   }
