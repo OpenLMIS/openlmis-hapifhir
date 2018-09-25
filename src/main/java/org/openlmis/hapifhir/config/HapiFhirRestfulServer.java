@@ -38,14 +38,17 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Component
 public class HapiFhirRestfulServer extends RestfulServer {
-
   private static final long serialVersionUID = 1L;
 
-  @Value("${service.url}")
-  private String serviceUrl;
+  private final String serviceUrl;
+  private final WebApplicationContext myAppCtx;
 
   @Autowired
-  private WebApplicationContext myAppCtx;
+  public HapiFhirRestfulServer(@Value("${service.url}") String serviceUrl,
+      WebApplicationContext myAppCtx) {
+    this.serviceUrl = serviceUrl;
+    this.myAppCtx = myAppCtx;
+  }
 
   @SuppressWarnings("unchecked")
   @Override

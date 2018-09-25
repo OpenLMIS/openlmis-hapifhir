@@ -57,9 +57,8 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
   /**
    * A bean that configures Dao.
-   * @return
    */
-  @Bean()
+  @Bean
   public DaoConfig daoConfig() {
     DaoConfig retVal = new DaoConfig();
     retVal.setAllowExternalReferences(true);
@@ -88,7 +87,8 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
    *
    * @return LocalContainerEntityManagerFactoryBean
    */
-  @Bean()
+  @Bean
+  @Override
   public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
     LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
     retVal.setPersistenceUnitName("default");
@@ -128,7 +128,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
   /**
    * Demo subscription security interceptor.
-   * @return
    */
   @Bean(autowire = Autowire.BY_TYPE)
   public IServerInterceptor subscriptionSecurityInterceptor() {
@@ -141,7 +140,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
    * @param entityManagerFactory entityManagerFactory
    * @return JpaTransactionManager
    */
-  @Bean()
+  @Bean
   public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
     JpaTransactionManager retVal = new JpaTransactionManager();
     retVal.setEntityManagerFactory(entityManagerFactory);
