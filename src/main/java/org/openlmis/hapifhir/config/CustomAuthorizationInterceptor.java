@@ -17,10 +17,11 @@ package org.openlmis.hapifhir.config;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
 
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.openlmis.hapifhir.i18n.Message;
+import org.openlmis.hapifhir.i18n.MessageKeys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,12 +30,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CustomAuthorizationInterceptor extends InterceptorAdapter {
-
-  static final AuthenticationException MISSING_AUTH =
-      new AuthenticationException("Missing authorization");
-  static final AuthenticationException INCORRECT_AUTH =
-      new AuthenticationException("Incorrect authorization");
-
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
@@ -50,7 +45,7 @@ public class CustomAuthorizationInterceptor extends InterceptorAdapter {
         .getAuthentication();
 
     if (null == authentication) {
-      throw MISSING_AUTH;
+      throw new AuthenticationMessageException(new Message(MessageKeys.MISSING_AUTHORIZATION));
     }
 
     if (authentication instanceof OAuth2Authentication) {
@@ -61,7 +56,7 @@ public class CustomAuthorizationInterceptor extends InterceptorAdapter {
       }
     }
 
-    throw INCORRECT_AUTH;
+    throw new AuthenticationMessageException(new Message(MessageKeys.INCORRECT_AUTHORIZATION));
   }
 
   private boolean checkServiceToken(OAuth2Authentication authentication) {

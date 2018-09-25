@@ -15,6 +15,7 @@
 
 package org.openlmis.hapifhir.web;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.willReturn;
@@ -54,7 +55,7 @@ public class LocationResourceIntegrationTest extends BaseResourceIntegrationTest
         .get(RESOURCE_URL)
         .then()
         .statusCode(HttpStatus.SC_UNAUTHORIZED)
-        .body(is("Incorrect authorization"));
+        .body("issue.diagnostics", hasItem("Incorrect authorization"));
   }
 
   @Test

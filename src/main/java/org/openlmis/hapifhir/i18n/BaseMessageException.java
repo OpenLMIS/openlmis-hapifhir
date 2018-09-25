@@ -15,30 +15,31 @@
 
 package org.openlmis.hapifhir.i18n;
 
-import java.util.Arrays;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public abstract class MessageKeys {
-  private static final String DELIMITER = ".";
+/**
+ * Base class for exceptions using Message.
+ */
+public abstract class BaseMessageException extends BaseServerResponseException {
+  private final transient Message message;
 
-  private static final String SERVICE_PREFIX = "hapifhir";
-
-  private static final String ERROR = "error";
-
-  private static final String AUTHORIZATION = "authorization";
-
-  private static final String MISSING = "missing";
-  private static final String INCORRECT = "incorrect";
-
-  private static final String ERROR_PREFIX = join(SERVICE_PREFIX, ERROR);
-
-  public static final String MISSING_AUTHORIZATION = join(ERROR_PREFIX, AUTHORIZATION, MISSING);
-  public static final String INCORRECT_AUTHORIZATION = join(ERROR_PREFIX, AUTHORIZATION, INCORRECT);
-
-  private MessageKeys() {
-    throw new UnsupportedOperationException();
+  public BaseMessageException(int theStatusCode, Message message) {
+    super(theStatusCode);
+    this.message = message;
   }
 
-  private static String join(String... params) {
-    return String.join(DELIMITER, Arrays.asList(params));
+  Message asMessage() {
+    return message;
   }
+
+  /**
+   * Overrides RuntimeException's public String getMessage().
+   *
+   * @return a localized string description
+   */
+  @Override
+  public String getMessage() {
+    return message.toString();
+  }
+
 }

@@ -16,15 +16,18 @@
 package org.openlmis.hapifhir.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.hapifhir.i18n.MessageKeys;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +40,9 @@ public class CustomAuthorizationInterceptorTest {
 
   private static final String SERVICE_TOKEN_CLIENT_ID = "service-token";
   private static final String API_KEY_PREFIX = "api-key-";
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   @InjectMocks
   private CustomAuthorizationInterceptor interceptor;
@@ -60,45 +66,54 @@ public class CustomAuthorizationInterceptorTest {
 
   @Test
   public void shouldThrowExceptionIfAuthorizationIsNotSet() {
-    when(securityContext.getAuthentication()).thenReturn(null);
+    exception.expect(AuthenticationMessageException.class);
+    exception.expectMessage(Matchers.containsString(MessageKeys.MISSING_AUTHORIZATION));
 
-    assertThatThrownBy(() -> interceptor.incomingRequestPreProcessed(null, null))
-        .isEqualTo(CustomAuthorizationInterceptor.MISSING_AUTH);
+    when(securityContext.getAuthentication()).thenReturn(null);
+    interceptor.incomingRequestPreProcessed(null, null);
   }
 
   @Test
   public void shouldThrowExceptionIfAuthorizationIsNotOAuth2() {
+    exception.expect(AuthenticationMessageException.class);
+    exception.expectMessage(Matchers.containsString(MessageKeys.INCORRECT_AUTHORIZATION));
+
     when(securityContext.getAuthentication())
         .thenReturn(new UsernamePasswordAuthenticationToken(null, null));
 
-    assertThatThrownBy(() -> interceptor.incomingRequestPreProcessed(null, null))
-        .isEqualTo(CustomAuthorizationInterceptor.INCORRECT_AUTH);
+    interceptor.incomingRequestPreProcessed(null, null);
   }
 
   @Test
   public void shouldThrowExceptionIfUserTokenWasUsed() {
+    exception.expect(AuthenticationMessageException.class);
+    exception.expectMessage(Matchers.containsString(MessageKeys.INCORRECT_AUTHORIZATION));
+
     when(authentication.isClientOnly()).thenReturn(false);
 
-    assertThatThrownBy(() -> interceptor.incomingRequestPreProcessed(null, null))
-        .isEqualTo(CustomAuthorizationInterceptor.INCORRECT_AUTH);
+    interceptor.incomingRequestPreProcessed(null, null);
   }
 
   @Test
   public void shouldThrowExceptionIfIncorrectClientIdWasUsed() {
+    exception.expect(AuthenticationMessageException.class);
+    exception.expectMessage(Matchers.containsString(MessageKeys.INCORRECT_AUTHORIZATION));
+
     when(authentication.getOAuth2Request())
         .thenReturn(createAuthRequest("invalid-client-id"));
 
-    assertThatThrownBy(() -> interceptor.incomingRequestPreProcessed(null, null))
-        .isEqualTo(CustomAuthorizationInterceptor.INCORRECT_AUTH);
+    interceptor.incomingRequestPreProcessed(null, null);
   }
 
   @Test
   public void shouldThrowExceptionIfTokenHasIncorrectPrefixWasUsed() {
+    exception.expect(AuthenticationMessageException.class);
+    exception.expectMessage(Matchers.containsString(MessageKeys.INCORRECT_AUTHORIZATION));
+
     when(authentication.getOAuth2Request())
         .thenReturn(createAuthRequest("invalid-"));
 
-    assertThatThrownBy(() -> interceptor.incomingRequestPreProcessed(null, null))
-        .isEqualTo(CustomAuthorizationInterceptor.INCORRECT_AUTH);
+    interceptor.incomingRequestPreProcessed(null, null);
   }
 
   @Test
