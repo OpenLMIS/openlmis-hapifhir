@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -131,9 +132,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
    */
   @Bean(autowire = Autowire.BY_TYPE)
   public IServerInterceptor subscriptionSecurityInterceptor() {
-    SubscriptionsRequireManualActivationInterceptorDstu3 retVal = new
-        SubscriptionsRequireManualActivationInterceptorDstu3();
-    return retVal;
+    return new SubscriptionsRequireManualActivationInterceptorDstu3();
   }
 
   /**
@@ -147,6 +146,19 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
     JpaTransactionManager retVal = new JpaTransactionManager();
     retVal.setEntityManagerFactory(entityManagerFactory);
     return retVal;
+  }
+
+  /**
+   * Configures FHIR servlet.
+   */
+  @Bean
+  public ServletRegistrationBean servletRegistrationBean(HapiFhirRestfulServer server) {
+    ServletRegistrationBean bean = new ServletRegistrationBean();
+    bean.setServlet(server);
+    bean.addUrlMappings("/hapifhir/*");
+    bean.setLoadOnStartup(1);
+
+    return bean;
   }
 
 }

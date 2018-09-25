@@ -1,121 +1,197 @@
 #%RAML 0.8
 ---
-title: OpenLMIS Template API
+title: OpenLMIS HAPI FHIR API
 version: "@version@"
 baseUri: "@baseUrl@"
 protocols: [ HTTP, HTTPS ]
 
 documentation:
-    - title: Getting Started
-      content: Welcome to the OpenLMIS hapifhir-service documentation. This minimal API is intended for illustrative purposes.
+- title: Getting Started
+  content: Welcome to the OpenLMIS hapifhir-service documentation. This minimal API is intended for illustrative purposes.
 
 schemas:
-  - auditLogEntry: !include schemas/auditLogEntry.json
-
-  - auditLogEntryArray: |
-      {
-          "type": "array",
-          "items": { "type": "object", "$ref": "schemas/auditLogEntry.json" }
-      }
-
-  - version: !include schemas/version.json
+- version: !include schemas/version.json
 
 traits:
-    - paginated:
-          queryParameters:
-              page:
-                  description: The page number which should be displayed. Note that the first page is numbered zero rather than one. Additionally, negative and undefined valued are interpreted as zero.
-                  type: integer
-                  required: false
-                  repeat: false
-              size:
-                  description: The desired size of each page. This specifies the maximum number of values that should be returned by the server. Zero, undefined, and negative values should result in all possible values being returned.
-                  type: integer
-                  required: false
-                  repeat: false
-    - secured:
-          queryParameters:
-              access_token:
-                  displayName: access_token
-                  description: OAuth2 access token
-                  type: string
-                  required: false
-                  repeat: false
-          headers:
-              Authorization:
-                  displayName: Authorization
-                  description: OAuth2 authorization token header. Takes the form of 'Bearer <token>'.
-                  type: string
-                  required: false
-                  repeat: false
-resourceTypes:
-    - auditLog:
-        description: This represents the audit log for all <<resourcePathName|!singularize>> resources.
-        get:
-          description: Returns all or part of the resource's audit log
-          # Although /auditLog endpoints support "page" and "number" query parameters for pagination,
-          # they don’t return the response body and set of pagination-related values expected to be
-          # returned for core domain resources.
-          is: [ paginated ]
-          queryParameters:
-              author:
-                  displayName: author
-                  description: Name of the author of changes which should be returned. By default, all changes are returned regardless of author.
-                  type: string
-                  required: false
-                  repeat: false
-              changedPropertyName:
-                  displayName: changedPropertyName
-                  description: The name of the property about which changes should be returned. If null or empty, changes associated with any and all properties are returned.
-                  type: string
-                  required: false
-                  repeat: false
-          responses:
-              200:
-                body:
-                  application/json:
-                    schema: auditLogEntryArray
-                    example: |
-                      [
-                        {
-                          "changeType": "ValueChange",
-                          "globalId": {
-                            "entity": "org.openlmis.SomeClass",
-                            "cdoId": 1
-                          },
-                          "commitMetadata": {
-                            "author": "SomeUserName",
-                            "properties": [],
-                            "commitDate": "2016-12-17T19:39:57.621",
-                            "id": 3
-                          },
-                          "property": "PropertyName",
-                          "left": "OldValue",
-                          "right": "NewValue"
-                        }
-                      ]
-              404:
-                description: The specified <<resourcePathName|!singularize>> does not exist.
+- fhir-resource:
+    queryParameters:
+      "_content":
+        displayName: "_content"
+        description: Search on the entire content of the resource
+        type: string
+        required: false
+        repeat: false
+      "_id":
+        displayName: "_id"
+        description: Logical id of this artifact
+        type: string
+        required: false
+        repeat: false
+      "_lastUpdated":
+        displayName: "_lastUpdated"
+        description: When the resource version last changed
+        type: string
+        required: false
+        repeat: false
+      "_profile":
+        displayName: "_profile"
+        description: Profiles this resource claims to conform to
+        type: string
+        required: false
+        repeat: false
+      "_query":
+        displayName: "_query"
+        description: A custom search profile that describes a specific defined query operation
+        type: string
+        required: false
+        repeat: false
+      "_security":
+        displayName: "_security"
+        description: Security Labels applied to this resource
+        type: string
+        required: false
+        repeat: false
+      "_tag":
+        displayName: "_content"
+        description: Tags applied to this resource
+        type: string
+        required: false
+        repeat: false
+- secured:
+    headers:
+      Authorization:
+        displayName: Authorization
+        description: OAuth2 authorization token header. Takes the form of 'Bearer <token>'.
+        type: string
+        required: false
+        repeat: false
 
-    - instanceAuditLog:
-        description: This represents the audit log for a specified instance of the <<resourcePathName|!singularize>> resource.
-        type: auditLog
-        uriParameters:
-            id:
-                type: string
-                required: true
-                repeat: false
 /hapifhir:
-    displayName: Version
+  displayName: Version
+  get:
+    description: Get version
+    responses:
+      200:
+        description: Returns version information.
+        headers:
+          X-Content-Type-Options:
+          X-XSS-Protection:
+        body:
+          application/json:
+            schema: version
+  /Location:
+    displayName: Location
     get:
-        description: Get version
-        responses:
-          200:
-            description: Returns version information.
-            headers:
-              X-Content-Type-Options:
-              X-XSS-Protection:
-            body:
-              application/json:
-                schema: version
-
+      is: [ fhir-resource, secured ]
+      description: Retrieve FHIR locations based on passed parameters
+      queryParameters:
+        address:
+          displayName: address
+          description: A (part of the) address of the location
+          type: string
+          required: false
+          repeat: false
+        address-city:
+          displayName: address-city
+          description: A city specified in an address
+          type: string
+          required: false
+          repeat: false
+        address-country:
+          displayName: address-country
+          description: A country specified in an address
+          type: string
+          required: false
+          repeat: false
+        address-postalcode:
+          displayName: address-postalcode
+          description: A postal code specified in an address
+          type: string
+          required: false
+          repeat: false
+        address-state:
+          displayName: address-state
+          description: A state specified in an address
+          type: string
+          required: false
+          repeat: false
+        address-use:
+          displayName: address-use
+          description: A use code specified in an address
+          type: string
+          required: false
+          repeat: false
+        endpoint:
+          displayName: endpoint
+          description: Technical endpoints providing access to services operated for the location
+          type: string
+          required: false
+          repeat: false
+        identifier:
+          displayName: identifier
+          description: An identifier for the location
+          type: string
+          required: false
+          repeat: false
+        name:
+          displayName: name
+          description: A portion of the location's name or alias
+          type: string
+          required: false
+          repeat: false
+        near:
+          displayName: near
+          description: >
+            The coordinates expressed as [latitude]:[longitude] to find locations near to (servers
+            may search using a square rather than a circle for efficiency) Requires the
+            near-distance parameter to be provided also
+          type: string
+          required: false
+          repeat: false
+        near-distance:
+          displayName: near-distance
+          description: >
+            A distance quantity to limit the near search to locations within a specific distance
+            Requires the near parameter to also be included
+          type: string
+          required: false
+          repeat: false
+        operational-status:
+          displayName: operational-status
+          description: >
+            Searches for locations (typically bed/room) that have an operational status
+            (e.g. contaminated, housekeeping)
+          type: string
+          required: false
+          repeat: false
+        organization:
+          displayName: organization
+          description: Searches for locations that are managed by the provided organization
+          type: string
+          required: false
+          repeat: false
+        partof:
+          displayName: partof
+          description: A location of which this location is a part
+          type: string
+          required: false
+          repeat: false
+        status:
+          displayName: status
+          description: Searches for locations with a specific kind of status
+          type: string
+          required: false
+          repeat: false
+        type:
+          displayName: type
+          description: A code for the type of location
+          type: string
+          required: false
+          repeat: false
+      responses:
+        200:
+          body:
+            application/json:
+        401:
+          body:
+            application/json:

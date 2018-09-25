@@ -27,20 +27,16 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-
 import java.util.Collection;
 import java.util.List;
-
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-
 import org.hl7.fhir.dstu3.model.Meta;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 
-@WebServlet(urlPatterns = "/hapifhir/*")
+@Component
 public class HapiFhirRestfulServer extends RestfulServer {
 
   private static final long serialVersionUID = 1L;

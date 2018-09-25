@@ -93,9 +93,14 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
         .antMatchers("/**").fullyAuthenticated();
   }
 
+  /**
+   * AccessTokenConverter bean initializer.
+   */
   @Bean
   public AccessTokenConverter accessTokenConverter() {
-    return new DefaultAccessTokenConverter();
+    DefaultAccessTokenConverter defaultAccessTokenConverter = new DefaultAccessTokenConverter();
+    defaultAccessTokenConverter.setUserTokenConverter(new CustomUserAuthenticationConverter());
+    return defaultAccessTokenConverter;
   }
 
   /**
