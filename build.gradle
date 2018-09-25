@@ -143,17 +143,6 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
-task flywayTest(type: Test) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-
-    include '**/migration/**'
-}
-
 task integrationTest(type: Test) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -163,8 +152,6 @@ task integrationTest(type: Test) {
     }
     mustRunAfter test
     environment 'BASE_URL', "http://localhost"
-
-    exclude '**/migration/**'
 }
 
 tasks.withType(Test) {
@@ -219,12 +206,17 @@ checkstyle {
 //Usage: gradle sonarqube
 sonarqube {
     properties {
+        def branch = System.getenv("SONAR_BRANCH")
+        if (branch && branch != 'master') {
+            property "sonar.branch", branch
+        }
+
         property "sonar.projectName", "OpenLMIS HAPI FHIR Service"
         property "sonar.projectKey", "org.sonarqube:$rootProject.name"
-        property "sonar.projectVersion", version
+        property "sonar.host.url", "http://sonar.openlmis.org"
         property "sonar.login", System.getenv("SONAR_LOGIN")
         property "sonar.password", System.getenv("SONAR_PASSWORD")
-        property "sonar.host.url", "http://sonar.openlmis.org"
+        property "sonar.projectVersion", version
         property "sonar.java.coveragePlugin", "jacoco"
         //Tells SonarQube where the unit tests execution reports are
         property "sonar.junit.reportsPath", "build/test-results/test"
@@ -235,6 +227,8 @@ sonarqube {
         properties["sonar.tests"] += sourceSets.integrationTest.java
     }
 }
+
+project.tasks["sonarqube"].dependsOn integrationTest
 
 pmd {
     toolVersion = '5.4.0'
