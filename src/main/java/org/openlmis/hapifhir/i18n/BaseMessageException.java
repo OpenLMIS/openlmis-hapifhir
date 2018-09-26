@@ -15,16 +15,19 @@
 
 package org.openlmis.hapifhir.i18n;
 
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import lombok.Getter;
 
 /**
  * Base class for exceptions using Message.
  */
-public abstract class BaseMessageException extends BaseServerResponseException {
+public abstract class BaseMessageException extends RuntimeException {
   private final transient Message message;
 
-  public BaseMessageException(int theStatusCode, Message message) {
-    super(theStatusCode);
+  @Getter
+  private final int statusCode;
+
+  public BaseMessageException(int statusCode, Message message) {
+    this.statusCode = statusCode;
     this.message = message;
   }
 

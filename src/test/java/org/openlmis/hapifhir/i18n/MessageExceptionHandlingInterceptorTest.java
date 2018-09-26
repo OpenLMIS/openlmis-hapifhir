@@ -24,11 +24,9 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
-import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,9 +62,6 @@ public class MessageExceptionHandlingInterceptorTest {
   private HttpServletRequest request;
 
   @Mock
-  private HttpServletResponse response;
-
-  @Mock
   private BaseServerResponseException fhirException;
 
   @Mock
@@ -83,17 +78,17 @@ public class MessageExceptionHandlingInterceptorTest {
   }
 
   @Test
-  public void shouldPassExceptionWithoutChangesToSuperMethodIfExceptionIsNotMessageBased()
-      throws ServletException, IOException {
+  public void shouldPassExceptionWithoutChangesToDelegateMethodIfExceptionIsNotMessageBased()
+      throws ServletException {
     // when
     when(fhirException.getStatusCode()).thenReturn(STATUS_CODE);
     when(fhirException.getMessage()).thenReturn(ERROR_MESSAGE);
 
-    interceptor.handleException(details, fhirException, request, response);
+    interceptor.preProcessOutgoingException(details, fhirException, request);
 
     // then
     verify(delegate)
-        .handleException(eq(details), exceptionCaptor.capture(), eq(request), eq(response));
+        .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
     verifyZeroInteractions(messageService);
 
     BaseServerResponseException capturedException = exceptionCaptor.getValue();
@@ -105,7 +100,7 @@ public class MessageExceptionHandlingInterceptorTest {
 
   @Test
   public void shouldModifyExceptionBeforeItWillBeMovedToSuperMethodIfExceptionIsMessageBased()
-      throws ServletException, IOException {
+      throws ServletException {
     // when
     when(messageException.getStatusCode()).thenReturn(STATUS_CODE);
     when(messageException.asMessage()).thenReturn(MESSAGE);
@@ -119,11 +114,11 @@ public class MessageExceptionHandlingInterceptorTest {
     when(messageSource.getMessage(ERROR_MESSAGE, null, ENGLISH_LOCALE))
         .thenReturn(ERROR_MESSAGE);
 
-    interceptor.handleException(details, messageException, request, response);
+    interceptor.preProcessOutgoingException(details, messageException, request);
 
     // then
     verify(delegate)
-        .handleException(eq(details), exceptionCaptor.capture(), eq(request), eq(response));
+        .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
 
     BaseServerResponseException capturedException = exceptionCaptor.getValue();
     assertThat(capturedException)

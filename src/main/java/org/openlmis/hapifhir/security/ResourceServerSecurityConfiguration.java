@@ -61,7 +61,7 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
   private String[] allowedMethods;
 
   @Override
-  public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+  public void configure(ResourceServerSecurityConfigurer resources) {
     resources.resourceId(resourceId);
   }
 
@@ -132,12 +132,15 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
     if (allowedOrigins.length > 0) {
       CorsConfiguration configuration = new CorsConfiguration();
       configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
       configuration.setAllowedMethods(Arrays.asList(allowedMethods));
+
       source.registerCorsConfiguration("/**", configuration);
     }
+
     return source;
   }
 }

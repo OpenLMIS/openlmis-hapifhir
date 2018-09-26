@@ -47,22 +47,28 @@ public class MessageExceptionHandlingInterceptor extends InterceptorAdapter {
   }
 
   @Override
-  public boolean handleException(RequestDetails details,
-      BaseServerResponseException exception, HttpServletRequest request,
-      HttpServletResponse response) throws ServletException, IOException {
+  public BaseServerResponseException preProcessOutgoingException(RequestDetails details,
+      Throwable throwable, HttpServletRequest request) throws ServletException {
 
-    BaseServerResponseException newException = exception;
+    Throwable newThrowable = throwable;
 
-    if (newException instanceof BaseMessageException) {
-      BaseMessageException messageException = (BaseMessageException) newException;
+    if (newThrowable instanceof BaseMessageException) {
+      BaseMessageException messageException = (BaseMessageException) newThrowable;
 
       Message message = messageException.asMessage();
       LocalizedMessage localize = messageService.localize(message);
 
-      newException = new LocalizedMessageException(messageException, localize);
+      newThrowable = new LocalizedMessageException(messageException, localize);
     }
 
-    return delegate.handleException(details, newException, request, response);
+    return delegate.preProcessOutgoingException(details, newThrowable, request);
+  }
+
+  @Override
+  public boolean handleException(RequestDetails details, BaseServerResponseException exception,
+      HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    return delegate.handleException(details, exception, request, response);
   }
 
   static final class LocalizedMessageException extends BaseServerResponseException {
