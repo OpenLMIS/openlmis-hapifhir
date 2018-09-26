@@ -51,7 +51,7 @@ public class CustomAuthorizationInterceptor extends InterceptorAdapter {
     if (authentication instanceof OAuth2Authentication) {
       OAuth2Authentication auth2Authentication = (OAuth2Authentication) authentication;
 
-      if (auth2Authentication.isClientOnly() && checkServiceToken(auth2Authentication)) {
+      if (auth2Authentication.isClientOnly() && isServiceOrApiKeyToken(auth2Authentication)) {
         return true;
       }
     }
@@ -59,7 +59,7 @@ public class CustomAuthorizationInterceptor extends InterceptorAdapter {
     throw new AuthenticationMessageException(new Message(MessageKeys.INCORRECT_AUTHORIZATION));
   }
 
-  private boolean checkServiceToken(OAuth2Authentication authentication) {
+  private boolean isServiceOrApiKeyToken(OAuth2Authentication authentication) {
     String clientId = authentication.getOAuth2Request().getClientId();
     return serviceTokenClientId.equals(clientId) || startsWith(clientId, apiKeyPrefix);
   }
