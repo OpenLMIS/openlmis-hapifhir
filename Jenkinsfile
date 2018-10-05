@@ -17,6 +17,9 @@ pipeline {
     environment {
         COMPOSE_PROJECT_NAME = "hapifhir${BRANCH_NAME}"
     }
+    parameters {
+        string(name: 'contractTestsBranch', defaultValue: 'master', description: 'The branch of contract tests to checkout')
+    }
     stages {
         stage('Preparation') {
             agent any
@@ -95,38 +98,57 @@ pipeline {
                 }
             }
         }
-        stage('Sonar analysis') {
-            agent any
-            environment {
-                PATH = "/usr/local/bin/:$PATH"
-            }
-            steps {
-                withSonarQubeEnv('Sonar OpenLMIS') {
-                    withCredentials([string(credentialsId: 'SONAR_LOGIN', variable: 'SONAR_LOGIN'), string(credentialsId: 'SONAR_PASSWORD', variable: 'SONAR_PASSWORD')]) {
-                        sh(script: "./ci-sonarAnalysis.sh")
+        stage('Parallel: Sonar analysis and contract tests') {
+            parallel {
+                stage('Sonar analysis') {
+                    agent any
+                    environment {
+                        PATH = "/usr/local/bin/:$PATH"
+                    }
+                    steps {
+                        withSonarQubeEnv('Sonar OpenLMIS') {
+                            withCredentials([string(credentialsId: 'SONAR_LOGIN', variable: 'SONAR_LOGIN'), string(credentialsId: 'SONAR_PASSWORD', variable: 'SONAR_PASSWORD')]) {
+                                sh(script: "./ci-sonarAnalysis.sh")
 
-                        // workaround: Sonar plugin retrieves the path directly from the output
-                        sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
+                                // workaround: Sonar plugin retrieves the path directly from the output
+                                sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
+                            }
+                        }
+                        timeout(time: 1, unit: 'HOURS') {
+                            script {
+                                def gate = waitForQualityGate()
+                                if (gate.status != 'OK') {
+                                    error 'Quality Gate FAILED'
+                                }
+                            }
+                        }
+                    }
+                    post {
+                        failure {
+                            script {
+                                notifyAfterFailure()
+                            }
+                        }
                     }
                 }
-                timeout(time: 1, unit: 'HOURS') {
-                    script {
-                        def gate = waitForQualityGate()
-                        if (gate.status != 'OK') {
-                            error 'Quality Gate FAILED'
+                stage('Contract tests') {
+                    steps {
+                        build job: "OpenLMIS-contract-tests-pipeline/${params.contractTestsBranch}", propagate: true, wait: true,
+                        parameters: [
+                            string(name: 'serviceName', value: 'hapifhir'),
+                            text(name: 'customEnv', value: "OL_HAPIFHIR_VERSION=${STAGING_VERSION}")
+                        ]
+                    }
+                    post {
+                        failure {
+                            script {
+                                notifyAfterFailure()
+                            }
                         }
                     }
                 }
             }
-            post {
-                failure {
-                    script {
-                        notifyAfterFailure()
-                    }
-                }
-            }
         }
-
         stage('Push image') {
             agent any
             when {
@@ -157,13 +179,21 @@ pipeline {
     }
     post {
         fixed {
-            slackSend color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} Back to normal"
+            script {
+                BRANCH = "${env.GIT_BRANCH}".trim()
+                if (BRANCH.equals("master") || BRANCH.startsWith("rel-")) {
+                    slackSend color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} Back to normal"
+                }
+            }
         }
     }
 }
 
 def notifyAfterFailure() {
-    slackSend color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED (<${env.BUILD_URL}|Open>)"
+    BRANCH = "${env.GIT_BRANCH}".trim()
+    if (BRANCH.equals("master") || BRANCH.startsWith("rel-")) {
+        slackSend color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED (<${env.BUILD_URL}|Open>)"
+    }
     emailext subject: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED",
         body: """<p>${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED</p><p>Check console <a href="${env.BUILD_URL}">output</a> to view the results.</p>""",
         recipientProviders: [[$class: 'CulpritsRecipientProvider'], [$class: 'DevelopersRecipientProvider']]
