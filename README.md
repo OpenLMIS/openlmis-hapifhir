@@ -227,24 +227,7 @@ To see how to set environment variables through Docker Compose, see the
 
 ## Environment variables
 
-The following environment variables are common to our services. They can be set either directly in compose files for images or provided as an environment file. See [docker-compose.yml](https://raw.githubusercontent.com/OpenLMIS/openlmis-ref-distro/master/docker-compose.yml) in the reference distribution for example usage. Also take a look at the sample [.env file](https://raw.githubusercontent.com/OpenLMIS/openlmis-config/master/.env) we provide. 
+Environment variables common to all services are listed here: https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#environment-variables
 
-* **BASE_URL** - The base url of the OpenLMIS distribution. Will be used in generated links pointing to this distribution, as well as for communication between services. Each service should communicate with others using BASE_URL as the base in order to avoid direct communication, which might not work in more complex deployments. Services should also use this variable if they wish to generate a link to the application. This should be an url, for example: https://example.openlmis.org
-* **VIRTUAL_HOST** - This is used by the nginx server as the virtual host under which the services are made avialble. This should be a host, for example: example.openlmis.org
-* **CONSUL_HOST** - Identifies the IP address or DNS name of the Consul server. Set this to the host or IP under which the distribution is available and Consul listens for connections. Services should register with Consul under this address. This should be a host or an IP, for example 8.8.8.8.
-* **CONSUL_PORT** - The port used by the Consul server - services should use this port to register with Consul. This should be a port number, for example 8500. 8500 is used by default.
-* **REQUIRE_SSL** - Whether HTTPS is required. If set to `true`, nginx will redirect all incoming HTTP connections to HTTPS. By default SSL will not be required - either leave it blank or set to `false` if you wish to allow HTTP connections.
-* **LOCALE** - Default localized system language. It will be applied to all running services, if this variable is missing default "en" value will be used.
-* **CORS_ALLOWED_ORIGINS** - Comma-separated list of origins that are allowed, for example: `https://test.openlmis.org,http://some.external.domain`. `*` allows all origins. Leave empty to disable CORS.
-* **CORS_ALLOWED_METHODS** - Comma-separated list of HTTP methods that are allowed for the above origins.
-
-These variables are used by services for their connection to the database (none of these have defaults):
-
-* **DATABASE_URL** - The JDBC url under which the database is accessible. Our services use `jdbc:postgresql://db:5432/open_lmis` for connecting to the PostgreSQL database running in a container.
-* **POSTGRES_USER** - The username of the database user that the services should use. This variable is also used by our PostgreSQL container to create a user.
-* **POSTGRES_PASSWORD** - The password of the database user that the services should use. This variable is also used by our PostgreSQL container to create a user.
-
-These variables are used by our builds in order to integrate with the [Transifex](https://www.transifex.com/) translation management system:
-
-* **TRANSIFEX_USER** - The username to use with Transifex for updating translations.
-* **TRANSIFEX_PASSWORD** - The password to use with Transifex for updating translations.
+* **LARGEST_GEO_LEVEL_NUMBER** - Define the level number of the largest area in the OpenLMIS eco-system. The default value is `1`.
+* **FACILITY_TYPE_ID** - Define the id of the default facility type which will be used when a new facility resource will be created. The default value is `ae9715b4-2a72-4769-8121-e3894aec5b70`.

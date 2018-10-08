@@ -17,6 +17,7 @@ package org.openlmis.hapifhir.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoConfig.IdStrategyEnum;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -63,6 +64,8 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
     DaoConfig retVal = new DaoConfig();
     retVal.setAllowExternalReferences(true);
     retVal.setAllowMultipleDelete(true);
+    retVal.setResourceServerIdStrategy(IdStrategyEnum.UUID);
+
     return retVal;
   }
 

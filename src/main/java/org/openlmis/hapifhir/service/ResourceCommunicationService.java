@@ -32,6 +32,29 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
   protected abstract Class<T[]> getArrayResultClass();
 
   /**
+   * Creates new resource.
+   */
+  public T create(T payload) {
+    RequestParameters parameters = RequestParameters.init();
+    RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
+
+    return execute("", parameters, headers, payload, HttpMethod.POST, getResultClass())
+        .getBody();
+  }
+
+  /**
+   * Updates existing resource.
+   */
+  public T update(T payload) {
+    String resourceUrl = payload.getId().toString();
+    RequestParameters parameters = RequestParameters.init();
+    RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
+
+    return execute(resourceUrl, parameters, headers, payload, HttpMethod.PUT, getResultClass())
+        .getBody();
+  }
+
+  /**
    * Return one object from service.
    *
    * @param id UUID of requesting object.

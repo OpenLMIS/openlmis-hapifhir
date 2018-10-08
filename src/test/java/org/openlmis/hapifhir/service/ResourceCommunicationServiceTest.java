@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestOperations;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public abstract class ResourceCommunicationServiceTest<T extends BaseDto>
     extends BaseCommunicationServiceTest<T> {
 
@@ -67,6 +68,46 @@ public abstract class ResourceCommunicationServiceTest<T extends BaseDto>
   }
 
   protected abstract ResourceCommunicationService<T> getService();
+
+  @Test
+  public void shouldCreateResource() {
+    // given
+    ResourceCommunicationService<T> service = getService();
+
+    // when
+    T instance = mockResponseEntityAndGetDto();
+    T created = service.create(instance);
+
+    // then
+    assertThat(created, is(instance));
+
+    verifyRequest()
+        .isPostRequest()
+        .hasAuthHeader()
+        .hasJsonAsContentType()
+        .hasBody(instance)
+        .isUriStartsWith(service.getServiceUrl() + service.getUrl());
+  }
+
+  @Test
+  public void shouldUpdateResource() {
+    // given
+    ResourceCommunicationService<T> service = getService();
+
+    // when
+    T instance = mockResponseEntityAndGetDto();
+    T created = service.update(instance);
+
+    // then
+    assertThat(created, is(instance));
+
+    verifyRequest()
+        .isPutRequest()
+        .hasAuthHeader()
+        .hasJsonAsContentType()
+        .hasBody(instance)
+        .isUriStartsWith(service.getServiceUrl() + service.getUrl() + instance.getId());
+  }
 
   @Test
   public void shouldFindResource() {

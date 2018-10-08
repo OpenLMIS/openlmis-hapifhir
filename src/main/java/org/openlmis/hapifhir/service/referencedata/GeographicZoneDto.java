@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.openlmis.hapifhir.service.BaseDto;
+import org.openlmis.hapifhir.service.ExtraDataContainer;
 
 @Getter
 @Setter
@@ -33,7 +34,7 @@ import org.openlmis.hapifhir.service.BaseDto;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public final class GeographicZoneDto extends BaseDto {
+public final class GeographicZoneDto extends BaseDto implements ExtraDataContainer {
   private String code;
   private String name;
   private GeographicLevelDto level;

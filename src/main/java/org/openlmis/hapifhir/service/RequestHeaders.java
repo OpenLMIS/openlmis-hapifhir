@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 public final class RequestHeaders {
   private Map<String, String> headers = Maps.newHashMap();
@@ -34,6 +35,10 @@ public final class RequestHeaders {
 
   public RequestHeaders setAuth(String token) {
     return isNotBlank(token) ? set(HttpHeaders.AUTHORIZATION, "Bearer " + token) : this;
+  }
+
+  public RequestHeaders setJsonAsContentType() {
+    return set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
   }
 
   /**

@@ -21,10 +21,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
 import org.junit.Test;
+import org.springframework.http.MediaType;
 
 public class RequestHeadersTest {
 
@@ -50,6 +52,16 @@ public class RequestHeadersTest {
     Map<String, Object> map = toMap(params);
     assertThat(map, not(hasKey("a")));
     assertThat(map, not(hasKey(AUTHORIZATION)));
+  }
+
+  @Test
+  public void shouldSetContentTypeParameterAsJson() {
+    RequestHeaders params = RequestHeaders
+        .init()
+        .setJsonAsContentType();
+
+    Map<String, Object> map = toMap(params);
+    assertThat(map, hasEntry(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
   }
 
   @Test

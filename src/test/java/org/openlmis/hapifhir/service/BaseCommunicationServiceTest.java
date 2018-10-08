@@ -51,6 +51,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestOperations;
@@ -253,11 +254,25 @@ public abstract class BaseCommunicationServiceTest<T> {
       return this;
     }
 
+    public RequestSummary isPutRequest() {
+      assertThat(method, is(HttpMethod.PUT));
+      return this;
+    }
+
     public RequestSummary hasAuthHeader() {
       List<String> authorization = entity.getHeaders().get(HttpHeaders.AUTHORIZATION);
 
       assertThat(authorization, hasSize(1));
       assertThat(authorization, hasItem(TOKEN_HEADER));
+
+      return this;
+    }
+
+    public RequestSummary hasJsonAsContentType() {
+      List<String> contentTypes = entity.getHeaders().get(HttpHeaders.CONTENT_TYPE);
+
+      assertThat(contentTypes, hasSize(1));
+      assertThat(contentTypes, hasItem(MediaType.APPLICATION_JSON_VALUE));
 
       return this;
     }
