@@ -80,6 +80,7 @@ public class GeographicZoneCreatorInterceptorTest
 
   private GeographicZoneDto geographicZone = new GeographicZoneDtoDataBuilder()
       .withLevel(currentGeographicLevel)
+      .withId(LOCATION_ID)
       .build();
 
   @Before
@@ -104,7 +105,7 @@ public class GeographicZoneCreatorInterceptorTest
     when(locationMock.getPosition()).thenReturn(POSITION);
     when(locationMock.getPartOf()).thenReturn(PART_OF);
 
-    GeographicZoneDto resource = interceptor.buildResource(locationMock);
+    GeographicZoneDto resource = interceptor.buildResource(locationMock).getResource();
 
     assertThat(resource.getName()).isEqualTo(NAME);
     assertThat(resource.getLatitude()).isEqualTo(LATITUDE);
@@ -119,7 +120,7 @@ public class GeographicZoneCreatorInterceptorTest
 
     when(locationMock.getPartOf()).thenReturn(PART_OF);
 
-    GeographicZoneDto resource = interceptor.buildResource(locationMock);
+    GeographicZoneDto resource = interceptor.buildResource(locationMock).getResource();
 
     assertThat(resource.getParent().getLevel()).isEqualTo(parentGeographicLevel);
     assertThat(resource.getLevel()).isEqualTo(currentGeographicLevel);
@@ -151,14 +152,14 @@ public class GeographicZoneCreatorInterceptorTest
 
   @Override
   protected void assertResourceAfterCreate(GeographicZoneDto resource) {
-    assertThat(resource.getId()).isNull();
+    assertThat(resource.getId()).isEqualTo(LOCATION_ID);
     assertThat(resource.getCode()).isEqualTo(ALIAS);
     assertThat(resource.getLevel()).isEqualTo(largestGeographicLevel);
   }
 
   @Override
   protected void assertResourceAfterUpdate(GeographicZoneDto resource) {
-    assertThat(resource.getId()).isNotNull();
+    assertThat(resource.getId()).isEqualTo(LOCATION_ID);
     assertThat(resource.getCode()).isEqualTo(ALIAS);
     assertThat(resource.getLevel()).isEqualTo(largestGeographicLevel);
   }

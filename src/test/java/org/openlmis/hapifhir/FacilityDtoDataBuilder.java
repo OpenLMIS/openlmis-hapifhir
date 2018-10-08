@@ -93,4 +93,9 @@ public class FacilityDtoDataBuilder {
     return facility;
   }
 
+  public FacilityDtoDataBuilder withId(UUID id) {
+    this.id = id;
+    return this;
+  }
+
 }

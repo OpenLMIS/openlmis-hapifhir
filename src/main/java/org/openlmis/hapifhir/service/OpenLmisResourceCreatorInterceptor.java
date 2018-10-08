@@ -21,6 +21,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
@@ -35,7 +37,6 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
     extends InterceptorAdapter {
 
   static final String IS_MANAGED_EXTERNALLY = "isManagedExternally";
-  static final String VIRTUAL_HOST = "VIRTUAL_HOST";
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -50,7 +51,7 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
     Location location = locationRepository.read(locationId);
 
     logger.debug("Build OpenLMIS's resources");
-    List<T> resources = location
+    List<BuildResult> resources = location
         .getPhysicalType()
         .getCoding()
         .stream()
@@ -61,10 +62,11 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
 
     ResourceCommunicationService<T> communicationService = getCommunicationService();
 
-    for (T resource : resources) {
+    for (BuildResult result : resources) {
+      T resource = result.getResource();
       resource.addExtraDataEntry(IS_MANAGED_EXTERNALLY, true);
 
-      if (null == resource.getId()) {
+      if (result.isCreated()) {
         logger.trace("Create new resource");
         communicationService.create(resource);
       } else {
@@ -76,7 +78,7 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
 
   protected abstract boolean supports(LocationPhysicalType type);
 
-  protected abstract T buildResource(Location location);
+  protected abstract BuildResult buildResource(Location location);
 
   protected abstract ResourceCommunicationService<T> getCommunicationService();
 
@@ -86,6 +88,13 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
     } catch (FHIRException exp) {
       throw new IllegalStateException(exp);
     }
+  }
+
+  @Getter
+  @AllArgsConstructor
+  public final class BuildResult {
+    private final T resource;
+    private final boolean created;
   }
 
 }

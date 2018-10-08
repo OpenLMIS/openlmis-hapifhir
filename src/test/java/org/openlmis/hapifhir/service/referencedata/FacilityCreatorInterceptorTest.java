@@ -83,6 +83,7 @@ public class FacilityCreatorInterceptorTest
       .build();
 
   private FacilityDto facility = new FacilityDtoDataBuilder()
+      .withId(LOCATION_ID)
       .build();
 
   @Before
@@ -106,7 +107,7 @@ public class FacilityCreatorInterceptorTest
     when(locationMock.getDescription()).thenReturn(DESCRIPTION);
     when(locationMock.getPosition()).thenReturn(POSITION);
 
-    FacilityDto resource = interceptor.buildResource(locationMock);
+    FacilityDto resource = interceptor.buildResource(locationMock).getResource();
 
     assertThat(resource.getName()).isEqualTo(NAME);
     assertThat(resource.getDescription()).isEqualTo(DESCRIPTION);
@@ -157,7 +158,7 @@ public class FacilityCreatorInterceptorTest
 
   @Override
   protected void assertResourceAfterCreate(FacilityDto resource) {
-    assertThat(resource.getId()).isNull();
+    assertThat(resource.getId()).isEqualTo(LOCATION_ID);
     assertThat(resource.getCode()).isEqualTo(ALIAS);
     assertThat(resource.getGeographicZone()).isEqualTo(geographicZone);
     assertThat(resource.getType()).isEqualTo(facilityType);
@@ -167,7 +168,7 @@ public class FacilityCreatorInterceptorTest
 
   @Override
   protected void assertResourceAfterUpdate(FacilityDto resource) {
-    assertThat(resource.getId()).isNotNull();
+    assertThat(resource.getId()).isEqualTo(LOCATION_ID);
     assertThat(resource.getCode()).isEqualTo(ALIAS);
     assertThat(resource.getGeographicZone()).isEqualTo(geographicZone);
     assertThat(resource.getType()).isEqualTo(facilityType);

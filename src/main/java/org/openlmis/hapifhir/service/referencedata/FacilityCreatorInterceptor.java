@@ -53,11 +53,15 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
   }
 
   @Override
-  protected FacilityDto buildResource(Location location) {
+  protected BuildResult buildResource(Location location) {
     FacilityDto facility = findFacility(location.getIdElement().getIdPart());
+    boolean created = false;
 
     if (null == facility) {
       facility = new FacilityDto();
+      facility.setId(UUID.fromString(location.getIdElement().getIdPart()));
+
+      created = true;
     }
 
     // optional
@@ -85,7 +89,7 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
     facility.setActive(location.getStatus() == LocationStatus.ACTIVE);
     facility.setEnabled(facility.getActive());
 
-    return facility;
+    return new BuildResult(facility, created);
   }
 
   @Override

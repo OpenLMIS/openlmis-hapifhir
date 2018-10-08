@@ -49,11 +49,15 @@ public class GeographicZoneCreatorInterceptor extends
   }
 
   @Override
-  protected GeographicZoneDto buildResource(Location location) {
+  protected BuildResult buildResource(Location location) {
     GeographicZoneDto geographicZone = findGeographicZone(location.getIdElement().getIdPart());
+    boolean created = false;
 
     if (null == geographicZone) {
       geographicZone = new GeographicZoneDto();
+      geographicZone.setId(UUID.fromString(location.getIdElement().getIdPart()));
+
+      created = true;
     }
 
     // optional
@@ -81,7 +85,7 @@ public class GeographicZoneCreatorInterceptor extends
     geographicZone.setCode(location.getAlias().get(0).getValueNotNull());
     geographicZone.setLevel(findGeographicLevel(location, geographicZone.getParent()));
 
-    return geographicZone;
+    return new BuildResult(geographicZone, created);
   }
 
   @Override
