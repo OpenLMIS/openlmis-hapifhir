@@ -21,40 +21,18 @@ import ca.uhn.fhir.jpa.dao.DaoConfig.IdStrategyEnum;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
-import org.apache.commons.dbcp2.BasicDataSource;
-
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 @Configuration
-@EnableTransactionManagement()
+@EntityScan("ca.uhn.fhir.jpa.entity")
 @PropertySource("classpath:application.properties")
 public class FhirServerConfig extends BaseJavaConfigDstu3 {
-
-  @Value("${spring.datasource.url}")
-  private String databaseUrl;
-
-  @Value("${spring.datasource.username}")
-  private String databaseUserName;
-
-  @Value("${spring.datasource.password}")
-  private String databasePassword;
-
 
   /**
    * A bean that configures Dao.
@@ -68,47 +46,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
     return retVal;
   }
-
-  /**
-   * Data Source for HAPI FHIR.
-   * This is required because with default auto configuration, HAPI FHIR assumes a derby database.
-   *
-   * @return DataSource
-   */
-  @Bean(destroyMethod = "close")
-  public DataSource dataSource() {
-    BasicDataSource retVal = new BasicDataSource();
-    retVal.setDriver(new org.postgresql.Driver());
-    retVal.setUrl(databaseUrl);
-    retVal.setUsername(databaseUserName);
-    retVal.setPassword(databasePassword);
-    return retVal;
-  }
-
-  /**
-   * Create a bean for a custom entity manager factory.
-   *
-   * @return LocalContainerEntityManagerFactoryBean
-   */
-  @Bean
-  @Override
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-    LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-    retVal.setPersistenceUnitName("default");
-    retVal.setDataSource(dataSource());
-    retVal.setPackagesToScan("ca.uhn.fhir");
-    retVal.setPersistenceProvider(new HibernatePersistenceProvider());
-    retVal.setJpaPropertyMap(jpaProperties().getProperties());
-    return retVal;
-  }
-
-
-  @Bean
-  @ConfigurationProperties("spring.jpa.properties")
-  public JpaProperties jpaProperties() {
-    return new JpaProperties();
-  }
-
 
   /**
    * Demo Logging interceptor.
@@ -135,19 +72,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
   @Bean(autowire = Autowire.BY_TYPE)
   public IServerInterceptor subscriptionSecurityInterceptor() {
     return new SubscriptionsRequireManualActivationInterceptorDstu3();
-  }
-
-  /**
-   * Configure transaction manager.
-   *
-   * @param entityManagerFactory entityManagerFactory
-   * @return JpaTransactionManager
-   */
-  @Bean
-  public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-    JpaTransactionManager retVal = new JpaTransactionManager();
-    retVal.setEntityManagerFactory(entityManagerFactory);
-    return retVal;
   }
 
   /**

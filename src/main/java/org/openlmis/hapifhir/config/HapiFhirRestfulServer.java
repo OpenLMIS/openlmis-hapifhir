@@ -27,13 +27,20 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.context.WebApplicationContext;
 
 @Component
@@ -82,7 +89,24 @@ public class HapiFhirRestfulServer extends RestfulServer {
     }
 
     setServerAddressStrategy(new HardcodedServerAddressStrategy(serviceUrl + "/hapifhir/"));
-
   }
 
+  @Override
+  protected void service(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+
+    // workaround for the problem which has been described in the following link:
+    // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
+    TransactionDefinition definition = new DefaultTransactionDefinition();
+    PlatformTransactionManager manager = myAppCtx.getBean(PlatformTransactionManager.class);
+    TransactionStatus transaction = manager.getTransaction(definition);
+
+    try {
+      super.service(request, response);
+      manager.commit(transaction);
+    } catch (Exception exp) {
+      manager.rollback(transaction);
+      throw exp;
+    }
+  }
 }
