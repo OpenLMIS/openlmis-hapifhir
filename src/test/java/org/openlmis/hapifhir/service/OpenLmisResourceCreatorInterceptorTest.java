@@ -19,13 +19,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor.IS_MANAGED_EXTERNALLY;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -39,10 +44,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpMethod;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidUsingHardCodedIP"})
 public abstract class OpenLmisResourceCreatorInterceptorTest
     <T extends BaseDto & ExtraDataContainer> {
+
+  private static final String REFERENCE_DATA_HOST = "127.0.0.1";
+  private static final String CLIENT_HOST = "127.0.0.7";
 
   protected static final UUID LOCATION_ID = UUID.randomUUID();
 
@@ -62,6 +73,9 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   @Mock
   private ServletRequestDetails details;
 
+  @Mock
+  private HttpServletRequest request;
+
   @Captor
   private ArgumentCaptor<T> resourceCaptor;
 
@@ -79,16 +93,25 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     when(physicalType.getCoding()).thenReturn(Lists.newArrayList(coding));
 
     when(coding.getCode()).thenReturn(getSupportedType().toCode());
+
+    when(request.getRemoteAddr()).thenReturn(CLIENT_HOST);
+
+    when(details.getServletRequest()).thenReturn(request);
+    when(details.getResourceName()).thenReturn("Location");
+
+    ReflectionTestUtils.setField(getInterceptor(), "referenceDataServerHost", REFERENCE_DATA_HOST);
   }
 
   @Test
   public void shouldCreateOpenLmisResource() {
     // given
-    OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
-    ResourceCommunicationService<T> communicationService = interceptor.getCommunicationService();
+    final OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
+    final ResourceCommunicationService<T> communicationService = interceptor
+        .getCommunicationService();
 
     // when
     prepareInterceptorForCreate(locationMock);
+    when(request.getMethod()).thenReturn("POST");
     interceptor.processingCompletedNormally(details);
 
     // then
@@ -103,11 +126,13 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   @Test
   public void shouldUpdateOpenLmisResource() {
     // given
-    OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
-    ResourceCommunicationService<T> communicationService = interceptor.getCommunicationService();
+    final OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
+    final ResourceCommunicationService<T> communicationService = interceptor
+        .getCommunicationService();
 
     // when
     prepareInterceptorForUpdate(locationMock);
+    when(request.getMethod()).thenReturn("PUT");
     interceptor.processingCompletedNormally(details);
 
     // then
@@ -122,6 +147,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   @Test(expected = IllegalStateException.class)
   public void shouldThrowExceptionIfCodingCannotBeConvertedToEnum() {
     when(coding.getCode()).thenReturn("test-code");
+    when(request.getMethod()).thenReturn("POST");
     getInterceptor().processingCompletedNormally(details);
   }
 
@@ -144,6 +170,44 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
           .as("Should not support: %s", type)
           .isFalse();
     }
+  }
+
+  @Test
+  public void shouldNotHandleRequestIfMethodIsNotPostOrPut() {
+    Set<HttpMethod> methods = Arrays
+        .stream(HttpMethod.values())
+        .filter(method -> method != HttpMethod.POST)
+        .filter(method -> method != HttpMethod.PUT)
+        .collect(Collectors.toSet());
+
+    OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
+
+    for (HttpMethod method : methods) {
+      when(request.getMethod()).thenReturn(method.name());
+      interceptor.processingCompletedNormally(details);
+    }
+
+    verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
+  }
+
+  @Test
+  public void shouldNotHandleRequestIfResourceIsNotLocation() {
+    OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
+
+    when(details.getResourceName()).thenReturn("TestResource");
+    interceptor.processingCompletedNormally(details);
+
+    verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
+  }
+
+  @Test
+  public void shouldNotHandleRequestIfItIsFromReferenceDataService() {
+    OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
+
+    when(request.getRemoteAddr()).thenReturn(REFERENCE_DATA_HOST);
+    interceptor.processingCompletedNormally(details);
+
+    verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
   }
 
   protected abstract OpenLmisResourceCreatorInterceptor<T> getInterceptor();

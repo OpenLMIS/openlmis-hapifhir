@@ -18,9 +18,12 @@ package org.openlmis.hapifhir.service;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -32,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 
 public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & ExtraDataContainer>
     extends InterceptorAdapter {
@@ -44,8 +48,15 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
   @Qualifier("myLocationDaoDstu3")
   private IFhirResourceDao<Location> locationRepository;
 
+  @Value("${referencedata.serverHost}")
+  private String referenceDataServerHost;
+
   @Override
   public void processingCompletedNormally(ServletRequestDetails details) {
+    if (shouldNotHandle(details)) {
+      return;
+    }
+
     IIdType locationId = details.getId();
     logger.debug("Load location with id: {}", details.getId());
     Location location = locationRepository.read(locationId);
@@ -81,6 +92,70 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
   protected abstract BuildResult buildResource(Location location);
 
   protected abstract ResourceCommunicationService<T> getCommunicationService();
+
+  private boolean shouldNotHandle(ServletRequestDetails details) {
+    HttpServletRequest request = details.getServletRequest();
+
+    if (incorrectRequestMethod(request)) {
+      return true;
+    }
+
+    if (incorrectResource(details)) {
+      return true;
+    }
+
+    InetAddress referenceDataHost;
+
+    try {
+      referenceDataHost = InetAddress.getByName(referenceDataServerHost);
+      logger.debug("Reference Data host: {}", referenceDataHost);
+    } catch (UnknownHostException exp) {
+      logger.error("Unknown host: " + referenceDataServerHost, exp);
+      return true;
+    }
+
+    String clientIpAddress = RequestHelper.getClientIpAddress(request);
+    logger.trace("Client IP Address: {}", clientIpAddress);
+
+    InetAddress clientHost;
+
+    try {
+      clientHost = InetAddress.getByName(clientIpAddress);
+      logger.debug("Client host: {}", referenceDataHost);
+    } catch (UnknownHostException exp) {
+      logger.error("Unknown host: " + clientIpAddress, exp);
+      return true;
+    }
+
+    return referenceDataHost.equals(clientHost);
+  }
+
+  private boolean incorrectRequestMethod(HttpServletRequest request) {
+    logger.trace("Request method: {}", request.getMethod());
+
+    boolean isNotPost = !"POST".equalsIgnoreCase(request.getMethod());
+    boolean isNotPut = !"PUT".equalsIgnoreCase(request.getMethod());
+
+    if (isNotPost && isNotPut) {
+      logger.debug("The request's method is not POST or PUT");
+      return true;
+    }
+
+    return false;
+  }
+
+  private boolean incorrectResource(ServletRequestDetails details) {
+    logger.trace("Resource name: {}", details.getResourceName());
+
+    boolean isNotLocation = !"Location".equalsIgnoreCase(details.getResourceName());
+
+    if (isNotLocation) {
+      logger.debug("The resource name is not equal to Location");
+      return true;
+    }
+
+    return false;
+  }
 
   private LocationPhysicalType convertCodingToEnum(Coding coding) {
     try {

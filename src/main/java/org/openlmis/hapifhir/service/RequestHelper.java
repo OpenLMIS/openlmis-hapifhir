@@ -15,10 +15,13 @@
 
 package org.openlmis.hapifhir.service;
 
+import com.google.common.net.HttpHeaders;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -66,6 +69,19 @@ public final class RequestHelper {
    */
   public static <E> HttpEntity<E> createEntity(E payload, RequestHeaders headers) {
     return new HttpEntity<>(payload, headers.toHeaders());
+  }
+
+  /**
+   * Gets Client's IP address from request.
+   */
+  public static String getClientIpAddress(HttpServletRequest request) {
+    String clientIpAddress = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+
+    if (StringUtils.isBlank(clientIpAddress)) {
+      clientIpAddress = request.getRemoteAddr();
+    }
+
+    return clientIpAddress;
   }
 
 }
