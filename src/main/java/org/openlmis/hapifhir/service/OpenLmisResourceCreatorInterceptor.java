@@ -53,7 +53,7 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
 
   @Override
   public void processingCompletedNormally(ServletRequestDetails details) {
-    if (shouldNotHandle(details)) {
+    if (shouldIgnore(details)) {
       return;
     }
 
@@ -93,14 +93,10 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
 
   protected abstract ResourceCommunicationService<T> getCommunicationService();
 
-  private boolean shouldNotHandle(ServletRequestDetails details) {
+  private boolean shouldIgnore(ServletRequestDetails details) {
     HttpServletRequest request = details.getServletRequest();
 
-    if (incorrectRequestMethod(request)) {
-      return true;
-    }
-
-    if (incorrectResource(details)) {
+    if (incorrectRequestMethod(request) || incorrectResource(details)) {
       return true;
     }
 
