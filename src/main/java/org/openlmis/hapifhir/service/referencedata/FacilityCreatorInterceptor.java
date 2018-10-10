@@ -17,6 +17,7 @@ package org.openlmis.hapifhir.service.referencedata;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Location;
@@ -53,15 +54,12 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
   }
 
   @Override
-  protected BuildResult buildResource(Location location) {
+  protected FacilityDto buildResource(Location location) {
     FacilityDto facility = findFacility(location.getIdElement().getIdPart());
-    boolean created = false;
 
     if (null == facility) {
       facility = new FacilityDto();
       facility.setId(UUID.fromString(location.getIdElement().getIdPart()));
-
-      created = true;
     }
 
     // optional
@@ -73,6 +71,8 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
         .ifPresent(facility::setDescription);
     Optional
         .ofNullable(location.getPosition())
+        .filter(position -> Objects.nonNull(position.getLongitude())
+            && Objects.nonNull(position.getLatitude()))
         .map(position -> {
           double longitude = position.getLongitude().doubleValue();
           double latitude = position.getLatitude().doubleValue();
@@ -89,7 +89,7 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
     facility.setActive(location.getStatus() == LocationStatus.ACTIVE);
     facility.setEnabled(facility.getActive());
 
-    return new BuildResult(facility, created);
+    return facility;
   }
 
   @Override

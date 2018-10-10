@@ -19,11 +19,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.net.URI;
-import javax.servlet.http.HttpServletRequest;
 import org.junit.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -80,27 +77,5 @@ public class RequestHelperTest {
 
     assertThat(entity.getHeaders().get(HttpHeaders.AUTHORIZATION),
         is(singletonList(BEARER + token)));
-  }
-
-  @Test
-  public void shouldGetClientIpAddressFromHeader() {
-    String ipAddress = "some-test-ip-address";
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getHeader(com.google.common.net.HttpHeaders.X_FORWARDED_FOR))
-        .thenReturn(ipAddress);
-
-    assertThat(RequestHelper.getClientIpAddress(request), is(ipAddress));
-  }
-
-  @Test
-  public void shouldGetClientIdAddressFromProperty() {
-    String ipAddress = "some-test-ip-address";
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getHeader(com.google.common.net.HttpHeaders.X_FORWARDED_FOR)).thenReturn(null);
-    when(request.getRemoteAddr()).thenReturn(ipAddress);
-
-    assertThat(RequestHelper.getClientIpAddress(request), is(ipAddress));
   }
 }

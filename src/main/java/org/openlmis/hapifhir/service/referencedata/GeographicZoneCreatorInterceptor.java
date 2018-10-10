@@ -15,8 +15,11 @@
 
 package org.openlmis.hapifhir.service.referencedata;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Location;
@@ -49,15 +52,12 @@ public class GeographicZoneCreatorInterceptor extends
   }
 
   @Override
-  protected BuildResult buildResource(Location location) {
+  protected GeographicZoneDto buildResource(Location location) {
     GeographicZoneDto geographicZone = findGeographicZone(location.getIdElement().getIdPart());
-    boolean created = false;
 
     if (null == geographicZone) {
       geographicZone = new GeographicZoneDto();
       geographicZone.setId(UUID.fromString(location.getIdElement().getIdPart()));
-
-      created = true;
     }
 
     // optional
@@ -67,17 +67,20 @@ public class GeographicZoneCreatorInterceptor extends
     Optional
         .ofNullable(location.getPosition())
         .map(LocationPositionComponent::getLatitude)
+        .filter(Objects::nonNull)
         .map(BigDecimal::doubleValue)
         .ifPresent(geographicZone::setLatitude);
     Optional
         .ofNullable(location.getPosition())
         .map(LocationPositionComponent::getLongitude)
+        .filter(Objects::nonNull)
         .map(BigDecimal::doubleValue)
         .ifPresent(geographicZone::setLongitude);
     Optional
         .ofNullable(location.getPartOf())
         .map(Reference::getReferenceElement)
         .map(IIdType::getIdPart)
+        .filter(Objects::nonNull)
         .map(this::findGeographicZone)
         .ifPresent(geographicZone::setParent);
 
@@ -85,7 +88,7 @@ public class GeographicZoneCreatorInterceptor extends
     geographicZone.setCode(location.getAlias().get(0).getValueNotNull());
     geographicZone.setLevel(findGeographicLevel(location, geographicZone.getParent()));
 
-    return new BuildResult(geographicZone, created);
+    return geographicZone;
   }
 
   @Override
@@ -97,10 +100,10 @@ public class GeographicZoneCreatorInterceptor extends
     List<GeographicLevelDto> levels = geographicLevelReferenceDataService.findAll();
     int currentLevel;
 
-    if (null == location.getPartOf()) {
+    if (isBlank(location.getPartOf().getReference())) {
       currentLevel = largestLevelNumber;
     } else {
-      int parentLevel = null == location.getPartOf() ? -1 : parent.getLevel().getLevelNumber();
+      int parentLevel = parent.getLevel().getLevelNumber();
       currentLevel = largestLevelNumber == 1 ? parentLevel + 1 : parentLevel - 1;
     }
 

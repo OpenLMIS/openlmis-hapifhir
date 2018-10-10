@@ -105,7 +105,7 @@ public class GeographicZoneCreatorInterceptorTest
     when(locationMock.getPosition()).thenReturn(POSITION);
     when(locationMock.getPartOf()).thenReturn(PART_OF);
 
-    GeographicZoneDto resource = interceptor.buildResource(locationMock).getResource();
+    GeographicZoneDto resource = interceptor.buildResource(locationMock);
 
     assertThat(resource.getName()).isEqualTo(NAME);
     assertThat(resource.getLatitude()).isEqualTo(LATITUDE);
@@ -120,7 +120,7 @@ public class GeographicZoneCreatorInterceptorTest
 
     when(locationMock.getPartOf()).thenReturn(PART_OF);
 
-    GeographicZoneDto resource = interceptor.buildResource(locationMock).getResource();
+    GeographicZoneDto resource = interceptor.buildResource(locationMock);
 
     assertThat(resource.getParent().getLevel()).isEqualTo(parentGeographicLevel);
     assertThat(resource.getLevel()).isEqualTo(currentGeographicLevel);
@@ -140,14 +140,14 @@ public class GeographicZoneCreatorInterceptorTest
   protected void prepareInterceptorForCreate(Location locationMock) {
     when(geographicZoneReferenceDataService.findOne(LOCATION_ID)).thenReturn(null);
     when(locationMock.getAlias()).thenReturn(Lists.newArrayList(new StringType(ALIAS)));
-    when(locationMock.getPartOf()).thenReturn(null);
+    when(locationMock.getPartOf()).thenReturn(new Reference());
   }
 
   @Override
   protected void prepareInterceptorForUpdate(Location locationMock) {
     when(geographicZoneReferenceDataService.findOne(LOCATION_ID)).thenReturn(geographicZone);
     when(locationMock.getAlias()).thenReturn(Lists.newArrayList(new StringType(ALIAS)));
-    when(locationMock.getPartOf()).thenReturn(null);
+    when(locationMock.getPartOf()).thenReturn(new Reference());
   }
 
   @Override

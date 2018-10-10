@@ -35,6 +35,7 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
    * Creates new resource.
    */
   public T create(T payload) {
+    logger.debug("Create resource {}: {}", getResultClass().getSimpleName(), payload);
     RequestParameters parameters = RequestParameters.init();
     RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
 
@@ -46,6 +47,7 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
    * Updates existing resource.
    */
   public T update(T payload) {
+    logger.debug("Update resource {}: {}", getResultClass().getSimpleName(), payload);
     String resourceUrl = payload.getId().toString();
     RequestParameters parameters = RequestParameters.init();
     RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();

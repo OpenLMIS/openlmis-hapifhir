@@ -107,7 +107,7 @@ public class FacilityCreatorInterceptorTest
     when(locationMock.getDescription()).thenReturn(DESCRIPTION);
     when(locationMock.getPosition()).thenReturn(POSITION);
 
-    FacilityDto resource = interceptor.buildResource(locationMock).getResource();
+    FacilityDto resource = interceptor.buildResource(locationMock);
 
     assertThat(resource.getName()).isEqualTo(NAME);
     assertThat(resource.getDescription()).isEqualTo(DESCRIPTION);

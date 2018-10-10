@@ -16,8 +16,6 @@
 package org.openlmis.hapifhir.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -31,7 +29,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
+import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -45,6 +45,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,9 +56,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public abstract class OpenLmisResourceCreatorInterceptorTest
     <T extends BaseDto & ExtraDataContainer> {
 
-  private static final String REFERENCE_DATA_HOST = "127.0.0.1";
-  private static final String CLIENT_HOST = "127.0.0.7";
-
+  private static final String API_KEY_PREFIX = "prefix";
   protected static final UUID LOCATION_ID = UUID.randomUUID();
 
   @Mock(name = "myLocationDaoDstu3")
@@ -76,6 +78,15 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   @Mock
   private HttpServletRequest request;
 
+  @Mock
+  private HttpServletResponse response;
+
+  @Mock
+  private SecurityContext securityContext;
+
+  @Mock
+  private OAuth2Authentication authentication;
+
   @Captor
   private ArgumentCaptor<T> resourceCaptor;
 
@@ -83,8 +94,6 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
   @Before
   public void setUp() {
-    when(details.getId()).thenReturn(locationId);
-
     when(locationRepository.read(locationId)).thenReturn(locationMock);
 
     when(locationMock.getPhysicalType()).thenReturn(physicalType);
@@ -94,12 +103,18 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
     when(coding.getCode()).thenReturn(getSupportedType().toCode());
 
-    when(request.getRemoteAddr()).thenReturn(CLIENT_HOST);
+    when(response.getHeader(HttpHeaders.CONTENT_LOCATION)).thenReturn(LOCATION_ID.toString());
 
     when(details.getServletRequest()).thenReturn(request);
+    when(details.getServletResponse()).thenReturn(response);
     when(details.getResourceName()).thenReturn("Location");
 
-    ReflectionTestUtils.setField(getInterceptor(), "referenceDataServerHost", REFERENCE_DATA_HOST);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isClientOnly()).thenReturn(true);
+    when(authentication.getOAuth2Request()).thenReturn(createAuthRequest(API_KEY_PREFIX));
+
+    ReflectionTestUtils.setField(getInterceptor(), "apiKeyPrefix", API_KEY_PREFIX);
+    SecurityContextHolder.setContext(securityContext);
   }
 
   @Test
@@ -115,8 +130,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     interceptor.processingCompletedNormally(details);
 
     // then
-    verify(communicationService).create(resourceCaptor.capture());
-    verify(communicationService, never()).update(any());
+    verify(communicationService).update(resourceCaptor.capture());
 
     T resource = resourceCaptor.getValue();
     assertThat(resource.getExtraData()).containsEntry(IS_MANAGED_EXTERNALLY, "true");
@@ -136,7 +150,6 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     interceptor.processingCompletedNormally(details);
 
     // then
-    verify(communicationService, never()).create(any());
     verify(communicationService).update(resourceCaptor.capture());
 
     T resource = resourceCaptor.getValue();
@@ -204,7 +217,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   public void shouldNotHandleRequestIfItIsFromReferenceDataService() {
     OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
 
-    when(request.getRemoteAddr()).thenReturn(REFERENCE_DATA_HOST);
+    when(authentication.getOAuth2Request()).thenReturn(createAuthRequest("service-token"));
     interceptor.processingCompletedNormally(details);
 
     verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
@@ -239,5 +252,9 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
    * related with minimal happy path. Other paths should be tested separately in subclass.
    */
   protected abstract void assertResourceAfterUpdate(T resource);
+
+  private OAuth2Request createAuthRequest(String clientId) {
+    return new OAuth2Request(null, clientId, null, true, null, null, null, null, null);
+  }
 
 }
