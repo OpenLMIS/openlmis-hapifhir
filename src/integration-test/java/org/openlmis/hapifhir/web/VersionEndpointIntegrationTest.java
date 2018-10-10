@@ -15,28 +15,27 @@
 
 package org.openlmis.hapifhir.web;
 
-import org.openlmis.util.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
-/**
- * Controller used for displaying service's version information.
- */
-@RestController
-public class VersionController {
+import org.apache.http.HttpStatus;
+import org.junit.Test;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(VersionController.class);
+public class VersionEndpointIntegrationTest extends BaseResourceIntegrationTest {
 
-  /**
-   * Displays version information.
-   *
-   * @return {Version} Returns version read from file.
-   */
-  @RequestMapping("/hapifhir")
-  public Version display() {
-    LOGGER.debug("Returning version");
-    return new Version();
+  @Test
+  public void shouldReturnServiceVersion() {
+    restAssured
+        .given()
+        .when()
+        .get("/hapifhir")
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .body("service", is(notNullValue()))
+        .body("build", is(notNullValue()))
+        .body("branch", is(notNullValue()))
+        .body("timeStamp", is(notNullValue()))
+        .body("version", is(notNullValue()));
   }
+
 }
