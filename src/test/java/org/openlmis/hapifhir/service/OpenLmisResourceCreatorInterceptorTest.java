@@ -22,8 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor.IS_MANAGED_EXTERNALLY;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Set;
@@ -74,10 +73,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   private Coding coding;
 
   @Mock
-  private RequestDetails details;
-
-  @Mock
-  private ResponseDetails responseDetails;
+  private ServletRequestDetails details;
 
   @Mock
   private HttpServletRequest request;
@@ -109,6 +105,8 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
     when(response.getHeader(HttpHeaders.CONTENT_LOCATION)).thenReturn(LOCATION_ID.toString());
 
+    when(details.getServletRequest()).thenReturn(request);
+    when(details.getServletResponse()).thenReturn(response);
     when(details.getResourceName()).thenReturn("Location");
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -129,7 +127,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     // when
     prepareInterceptorForCreate(locationMock);
     when(request.getMethod()).thenReturn("POST");
-    interceptor.outgoingResponse(details, responseDetails, request, response);
+    interceptor.processingCompletedNormally(details);
 
     // then
     verify(communicationService).update(resourceCaptor.capture());
@@ -149,7 +147,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     // when
     prepareInterceptorForUpdate(locationMock);
     when(request.getMethod()).thenReturn("PUT");
-    interceptor.outgoingResponse(details, responseDetails, request, response);
+    interceptor.processingCompletedNormally(details);
 
     // then
     verify(communicationService).update(resourceCaptor.capture());
@@ -163,7 +161,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   public void shouldThrowExceptionIfCodingCannotBeConvertedToEnum() {
     when(coding.getCode()).thenReturn("test-code");
     when(request.getMethod()).thenReturn("POST");
-    getInterceptor().outgoingResponse(details, responseDetails, request, response);
+    getInterceptor().processingCompletedNormally(details);
   }
 
   @Test
@@ -199,7 +197,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
     for (HttpMethod method : methods) {
       when(request.getMethod()).thenReturn(method.name());
-      interceptor.outgoingResponse(details, responseDetails, request, response);
+      interceptor.processingCompletedNormally(details);
     }
 
     verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
@@ -210,7 +208,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
 
     when(details.getResourceName()).thenReturn("TestResource");
-    interceptor.outgoingResponse(details, responseDetails, request, response);
+    interceptor.processingCompletedNormally(details);
 
     verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
   }
@@ -220,7 +218,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
     OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
 
     when(authentication.getOAuth2Request()).thenReturn(createAuthRequest("service-token"));
-    interceptor.outgoingResponse(details, responseDetails, request, response);
+    interceptor.processingCompletedNormally(details);
 
     verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
   }
