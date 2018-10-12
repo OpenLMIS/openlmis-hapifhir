@@ -18,12 +18,14 @@ package org.openlmis.hapifhir.service;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -56,17 +58,17 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
   private String apiKeyPrefix;
 
   @Override
-  public void processingCompletedNormally(ServletRequestDetails details) {
-    if (shouldIgnore(details)) {
+  public boolean outgoingResponse(RequestDetails details, ResponseDetails responseDetails,
+      HttpServletRequest request, HttpServletResponse response) {
+
+    if (shouldIgnore(details, request)) {
       logger.info(
           "Request came from the reference data service. Skipping synchronization process."
       );
-      return;
+      return true;
     }
 
-    String contentLocation = details
-        .getServletResponse()
-        .getHeader(HttpHeaders.CONTENT_LOCATION);
+    String contentLocation = response.getHeader(HttpHeaders.CONTENT_LOCATION);
     IIdType locationId = new IdType(new UriType(contentLocation));
     logger.debug("Load location with id: {}", locationId);
     Location location = locationRepository.read(locationId);
@@ -90,6 +92,8 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
       logger.trace("Update the existing resource");
       communicationService.update(resource);
     }
+
+    return true;
   }
 
   protected abstract boolean supports(LocationPhysicalType type);
@@ -98,9 +102,7 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
 
   protected abstract ResourceCommunicationService<T> getCommunicationService();
 
-  private boolean shouldIgnore(ServletRequestDetails details) {
-    HttpServletRequest request = details.getServletRequest();
-
+  private boolean shouldIgnore(RequestDetails details, HttpServletRequest request) {
     if (incorrectRequestMethod(request) || incorrectResource(details)) {
       return true;
     }
@@ -133,7 +135,7 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
     return false;
   }
 
-  private boolean incorrectResource(ServletRequestDetails details) {
+  private boolean incorrectResource(RequestDetails details) {
     logger.trace("Resource name: {}", details.getResourceName());
 
     boolean isNotLocation = !"Location".equalsIgnoreCase(details.getResourceName());
