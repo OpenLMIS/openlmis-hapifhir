@@ -13,46 +13,24 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.hapifhir.i18n;
+package org.openlmis.hapifhir.service;
 
-import lombok.Getter;
+import org.apache.http.HttpStatus;
+import org.openlmis.hapifhir.i18n.BaseMessageException;
+import org.openlmis.hapifhir.i18n.Message;
 
 /**
- * Base class for exceptions using Message.
+ * Exception for indicating that some input or constraint is invalid.  This should result in a BAD
+ * REQUEST api response.
  */
-public abstract class BaseMessageException extends RuntimeException {
-  private final transient Message message;
-
-  @Getter
-  private final int statusCode;
-
-  public BaseMessageException(int statusCode, Message message) {
-    this(statusCode, message, null);
-  }
+public class ValidationMessageException extends BaseMessageException {
 
   /**
-   * Create a new exception with the given status code, message and, cause.
+   * Create a new validation exception with the given message.
    * @param message the message.
-   * @param cause the cause of this exception.
    */
-  public BaseMessageException(int statusCode, Message message, Throwable cause) {
-    super(cause);
-    this.message = message;
-    this.statusCode = statusCode;
-  }
-
-  Message asMessage() {
-    return message;
-  }
-
-  /**
-   * Overrides RuntimeException's public String getMessage().
-   *
-   * @return a localized string description
-   */
-  @Override
-  public String getMessage() {
-    return message.toString();
+  public ValidationMessageException(Message message) {
+    super(HttpStatus.SC_BAD_REQUEST, message);
   }
 
 }

@@ -40,7 +40,7 @@ public class Message {
    * @param messageKey the key of the message
    * @param messageParameters the ordered parameters for substitution in a localized message.
    */
-  Message(String messageKey, Object... messageParameters) {
+  public Message(String messageKey, Object... messageParameters) {
     Validate.notBlank(messageKey);
     this.key = messageKey.trim();
     this.params = messageParameters;

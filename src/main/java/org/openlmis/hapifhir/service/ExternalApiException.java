@@ -13,46 +13,24 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.hapifhir.i18n;
+package org.openlmis.hapifhir.service;
 
-import lombok.Getter;
+public class ExternalApiException extends RuntimeException {
 
-/**
- * Base class for exceptions using Message.
- */
-public abstract class BaseMessageException extends RuntimeException {
-  private final transient Message message;
+  private final transient LocalizedMessageDto localizedMessage;
 
-  @Getter
-  private final int statusCode;
-
-  public BaseMessageException(int statusCode, Message message) {
-    this(statusCode, message, null);
-  }
-
-  /**
-   * Create a new exception with the given status code, message and, cause.
-   * @param message the message.
-   * @param cause the cause of this exception.
-   */
-  public BaseMessageException(int statusCode, Message message, Throwable cause) {
+  ExternalApiException(Throwable cause, LocalizedMessageDto localizedMessage) {
     super(cause);
-    this.message = message;
-    this.statusCode = statusCode;
+    this.localizedMessage = localizedMessage;
   }
 
-  Message asMessage() {
-    return message;
-  }
-
-  /**
-   * Overrides RuntimeException's public String getMessage().
-   *
-   * @return a localized string description
-   */
   @Override
   public String getMessage() {
-    return message.toString();
+    return localizedMessage.toString();
+  }
+
+  public LocalizedMessageDto getMessageLocalized() {
+    return localizedMessage;
   }
 
 }

@@ -15,10 +15,15 @@
 
 package org.openlmis.hapifhir.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.openlmis.hapifhir.i18n.Message;
+import org.openlmis.hapifhir.i18n.MessageKeys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,6 +31,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 public abstract class ResourceCommunicationService<T extends BaseDto>
     extends BaseCommunicationService {
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   protected abstract Class<T> getResultClass();
 
@@ -36,11 +44,7 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
    */
   public T create(T payload) {
     logger.debug("Create resource {}: {}", getResultClass().getSimpleName(), payload);
-    RequestParameters parameters = RequestParameters.init();
-    RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
-
-    return execute("", parameters, headers, payload, HttpMethod.POST, getResultClass())
-        .getBody();
+    return addOrUpdate("", payload, HttpMethod.POST);
   }
 
   /**
@@ -49,11 +53,35 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
   public T update(T payload) {
     logger.debug("Update resource {}: {}", getResultClass().getSimpleName(), payload);
     String resourceUrl = payload.getId().toString();
+
+    return addOrUpdate(resourceUrl, payload, HttpMethod.PUT);
+  }
+
+  private T addOrUpdate(String resourceUrl, T payload, HttpMethod method) {
     RequestParameters parameters = RequestParameters.init();
     RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
 
-    return execute(resourceUrl, parameters, headers, payload, HttpMethod.PUT, getResultClass())
-        .getBody();
+    try {
+      return execute(resourceUrl, parameters, headers, payload, method, getResultClass())
+          .getBody();
+    } catch (HttpStatusCodeException exp) {
+      throw handleException(exp);
+    }
+  }
+
+  private RuntimeException handleException(HttpStatusCodeException exp) {
+    if (exp.getStatusCode() == HttpStatus.BAD_REQUEST) {
+      try {
+        LocalizedMessageDto localizedMessage = objectMapper
+            .readValue(exp.getResponseBodyAsString(), LocalizedMessageDto.class);
+
+        return new ExternalApiException(exp, localizedMessage);
+      } catch (IOException ex2) {
+        return new ServerException(new Message(MessageKeys.ERROR_IO, ex2.getMessage()), ex2);
+      }
+    } else {
+      return DataRetrievalException.build(getResultClass().getSimpleName(), exp);
+    }
   }
 
   /**

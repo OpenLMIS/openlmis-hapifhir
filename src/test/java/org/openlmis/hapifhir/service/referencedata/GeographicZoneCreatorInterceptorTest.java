@@ -16,6 +16,7 @@
 package org.openlmis.hapifhir.service.referencedata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -33,8 +34,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openlmis.hapifhir.GeographicLevelDtoDataBuilder;
 import org.openlmis.hapifhir.GeographicZoneDtoDataBuilder;
+import org.openlmis.hapifhir.i18n.MessageKeys;
 import org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor;
 import org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptorTest;
+import org.openlmis.hapifhir.service.ValidationMessageException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class GeographicZoneCreatorInterceptorTest
@@ -124,6 +127,59 @@ public class GeographicZoneCreatorInterceptorTest
 
     assertThat(resource.getParent().getLevel()).isEqualTo(parentGeographicLevel);
     assertThat(resource.getLevel()).isEqualTo(currentGeographicLevel);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfGeoZoneCantBeFound() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+
+    when(locationMock.getPartOf()).thenReturn(PART_OF);
+    when(geographicZoneReferenceDataService.findOne(parentGeographicZone.getId())).thenReturn(null);
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_NOT_FOUND_GEO_ZONE));
+
+    interceptor.buildResource(locationMock);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfGeoZoneCodeIsNullAndAliasListWasNotSet() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+
+    when(locationMock.getAlias()).thenReturn(Lists.newArrayList());
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_GEO_ZONE_CODE_REQUIRED));
+
+    interceptor.buildResource(locationMock);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfGeoZoneCodeIsNullAndAliasListWasSet() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+
+    when(locationMock.getAlias()).thenReturn(Lists.newArrayList(new StringType()));
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_GEO_ZONE_CODE_REQUIRED));
+
+    interceptor.buildResource(locationMock);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfGeoLevelCantBeFound() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+
+    when(geographicLevelReferenceDataService.findAll()).thenReturn(Lists.newArrayList());
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_NOT_FOUND_GEO_LEVEL));
+
+    interceptor.buildResource(locationMock);
   }
 
   @Override

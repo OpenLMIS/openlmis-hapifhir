@@ -16,6 +16,7 @@
 package org.openlmis.hapifhir.service.referencedata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +40,10 @@ import org.mockito.Spy;
 import org.openlmis.hapifhir.FacilityDtoDataBuilder;
 import org.openlmis.hapifhir.FacilityTypeDtoDataBuilder;
 import org.openlmis.hapifhir.GeographicZoneDtoDataBuilder;
+import org.openlmis.hapifhir.i18n.MessageKeys;
 import org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor;
 import org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptorTest;
+import org.openlmis.hapifhir.service.ValidationMessageException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class FacilityCreatorInterceptorTest
@@ -126,6 +129,54 @@ public class FacilityCreatorInterceptorTest
     interceptor.buildResource(locationMock);
 
     verify(facilityTypeReferenceDataService).findOne(facilityType.getId());
+  }
+
+  @Test
+  public void shouldThrowExceptionIfFacilityCodeIsNullAndAliasListWasNotSet() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+    when(locationMock.getAlias()).thenReturn(Lists.newArrayList());
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_FACILITY_CODE_REQUIRED));
+
+    interceptor.buildResource(locationMock);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfFacilityCodeIsNullAndAliasListWasSet() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+    when(locationMock.getAlias()).thenReturn(Lists.newArrayList(new StringType()));
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_FACILITY_CODE_REQUIRED));
+
+    interceptor.buildResource(locationMock);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfFacilityTypeCantBeFound() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+    when(facilityTypeReferenceDataService.findOne(facilityType.getId())).thenReturn(null);
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_NOT_FOUND_FACILITY_TYPE));
+
+    interceptor.buildResource(locationMock);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfGeographicZoneCantBeFound() {
+    Location locationMock = getLocationMock();
+    prepareInterceptorForCreate(locationMock);
+    when(geographicZoneReferenceDataService.findOne(GEO_ZONE_ID)).thenReturn(null);
+
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(containsString(MessageKeys.ERROR_NOT_FOUND_GEO_ZONE));
+
+    interceptor.buildResource(locationMock);
   }
 
   @Override

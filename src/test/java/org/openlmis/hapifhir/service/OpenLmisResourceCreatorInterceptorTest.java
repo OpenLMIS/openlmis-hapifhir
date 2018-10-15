@@ -33,7 +33,9 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -52,6 +54,9 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
   private static final String API_KEY_PREFIX = "prefix";
   protected static final UUID LOCATION_ID = UUID.randomUUID();
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   @Mock
   @Getter

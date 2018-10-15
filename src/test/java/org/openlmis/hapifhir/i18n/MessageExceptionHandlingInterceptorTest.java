@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +36,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.hapifhir.i18n.MessageExceptionHandlingInterceptor.LocalizedMessageException;
+import org.openlmis.hapifhir.service.ExternalApiException;
+import org.openlmis.hapifhir.service.LocalizedMessageDto;
 import org.springframework.context.MessageSource;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,6 +46,9 @@ public class MessageExceptionHandlingInterceptorTest {
   private static final Locale ENGLISH_LOCALE = Locale.ENGLISH;
   private static final int STATUS_CODE = 404;
   private static final String ERROR_MESSAGE = "error-message";
+
+  private static final LocalizedMessageDto EXTERNAL_MESSAGE =
+      new LocalizedMessageDto(ERROR_MESSAGE, ERROR_MESSAGE);
 
   private static final Message MESSAGE = new Message(ERROR_MESSAGE);
 
@@ -66,6 +72,9 @@ public class MessageExceptionHandlingInterceptorTest {
 
   @Mock
   private BaseMessageException messageException;
+
+  @Mock
+  private ExternalApiException externalApiException;
 
   @Captor
   private ArgumentCaptor<BaseServerResponseException> exceptionCaptor;
@@ -124,6 +133,26 @@ public class MessageExceptionHandlingInterceptorTest {
     assertThat(capturedException)
         .isInstanceOf(LocalizedMessageException.class)
         .hasFieldOrPropertyWithValue("statusCode", STATUS_CODE)
+        .hasFieldOrPropertyWithValue("message", ERROR_MESSAGE);
+  }
+
+  @Test
+  public void shouldModifyExceptionBeforeItWillBeMovedToSuperMethodIfExceptionIsExternalApi()
+      throws ServletException {
+    // when
+    when(externalApiException.getMessageLocalized()).thenReturn(EXTERNAL_MESSAGE);
+
+    interceptor.preProcessOutgoingException(details, externalApiException, request);
+
+    // then
+    verify(delegate)
+        .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
+    verifyZeroInteractions(messageService, messageSource);
+
+    BaseServerResponseException capturedException = exceptionCaptor.getValue();
+    assertThat(capturedException)
+        .isInstanceOf(LocalizedMessageException.class)
+        .hasFieldOrPropertyWithValue("statusCode", HttpStatus.SC_BAD_REQUEST)
         .hasFieldOrPropertyWithValue("message", ERROR_MESSAGE);
   }
 }

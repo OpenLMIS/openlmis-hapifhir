@@ -24,11 +24,15 @@ import java.util.Optional;
 import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.openlmis.hapifhir.i18n.Message;
+import org.openlmis.hapifhir.i18n.MessageKeys;
 import org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor;
 import org.openlmis.hapifhir.service.ResourceCommunicationService;
+import org.openlmis.hapifhir.service.ValidationMessageException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -53,7 +57,8 @@ public class GeographicZoneCreatorInterceptor extends
 
   @Override
   protected GeographicZoneDto buildResource(Location location) {
-    GeographicZoneDto geographicZone = findGeographicZone(location.getIdElement().getIdPart());
+    GeographicZoneDto geographicZone = findGeographicZone(
+        location.getIdElement().getIdPart(), false);
 
     if (null == geographicZone) {
       geographicZone = new GeographicZoneDto();
@@ -81,11 +86,17 @@ public class GeographicZoneCreatorInterceptor extends
         .map(Reference::getReferenceElement)
         .map(IIdType::getIdPart)
         .filter(Objects::nonNull)
-        .map(this::findGeographicZone)
+        .map(id -> findGeographicZone(id, true))
         .ifPresent(geographicZone::setParent);
 
     // mandatory
-    geographicZone.setCode(location.getAlias().get(0).getValueNotNull());
+    geographicZone.setCode(
+        Optional
+            .ofNullable(location.getAlias())
+            .map(list -> list.isEmpty() ? null : list.get(0))
+            .map(PrimitiveType::getValue)
+            .orElseThrow(() -> new ValidationMessageException(
+                new Message(MessageKeys.ERROR_GEO_ZONE_CODE_REQUIRED))));
     geographicZone.setLevel(findGeographicLevel(location, geographicZone.getParent()));
 
     return geographicZone;
@@ -111,12 +122,20 @@ public class GeographicZoneCreatorInterceptor extends
         .stream()
         .filter(level -> level.getLevelNumber() == currentLevel)
         .findFirst()
-        .orElse(null);
+        .orElseThrow(() -> new ValidationMessageException(
+            new Message(MessageKeys.ERROR_NOT_FOUND_GEO_LEVEL, currentLevel)));
   }
 
-  private GeographicZoneDto findGeographicZone(String id) {
+  private GeographicZoneDto findGeographicZone(String id, boolean required) {
     UUID idAsUuid = UUID.fromString(id);
-    return geographicZoneReferenceDataService.findOne(idAsUuid);
+    GeographicZoneDto found = geographicZoneReferenceDataService.findOne(idAsUuid);
+
+    if (required && null == found) {
+      throw new ValidationMessageException(
+          new Message(MessageKeys.ERROR_NOT_FOUND_GEO_ZONE, idAsUuid));
+    }
+
+    return found;
   }
 
 }

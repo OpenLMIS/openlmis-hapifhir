@@ -23,7 +23,10 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 import org.openlmis.hapifhir.i18n.Message.LocalizedMessage;
+import org.openlmis.hapifhir.service.ExternalApiException;
+import org.openlmis.hapifhir.service.LocalizedMessageDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,6 +64,13 @@ public class MessageExceptionHandlingInterceptor extends InterceptorAdapter {
       newThrowable = new LocalizedMessageException(messageException, localize);
     }
 
+    if (newThrowable instanceof ExternalApiException) {
+      ExternalApiException externalApiException = (ExternalApiException) newThrowable;
+
+      LocalizedMessageDto message = externalApiException.getMessageLocalized();
+      newThrowable = new LocalizedMessageException(HttpStatus.SC_BAD_REQUEST, message.asMessage());
+    }
+
     return delegate.preProcessOutgoingException(details, newThrowable, request);
   }
 
@@ -74,7 +84,11 @@ public class MessageExceptionHandlingInterceptor extends InterceptorAdapter {
   static final class LocalizedMessageException extends BaseServerResponseException {
 
     LocalizedMessageException(BaseMessageException exception, LocalizedMessage localize) {
-      super(exception.getStatusCode(), localize.asMessage());
+      this(exception.getStatusCode(), localize.asMessage());
+    }
+
+    LocalizedMessageException(int statusCode, String message) {
+      super(statusCode, message);
     }
   }
 

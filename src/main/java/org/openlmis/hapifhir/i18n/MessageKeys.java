@@ -25,14 +25,37 @@ public abstract class MessageKeys {
   private static final String ERROR = "error";
 
   private static final String AUTHORIZATION = "authorization";
+  private static final String IO = "io";
+  private static final String GEOGRAPHIC_ZONE = "geographicZone";
+  private static final String FACILITY = "facility";
+
+  private static final String LEVEL = "level";
+  private static final String CODE = "code";
+  private static final String FACILITY_TYPE = "facilityType";
 
   private static final String MISSING = "missing";
   private static final String INCORRECT = "incorrect";
+  private static final String NOT_FOUND = "notFound";
+  private static final String REQUIRED = "required";
 
   private static final String ERROR_PREFIX = join(SERVICE_PREFIX, ERROR);
 
   public static final String MISSING_AUTHORIZATION = join(ERROR_PREFIX, AUTHORIZATION, MISSING);
   public static final String INCORRECT_AUTHORIZATION = join(ERROR_PREFIX, AUTHORIZATION, INCORRECT);
+
+  public static final String ERROR_IO = join(ERROR_PREFIX, IO);
+
+  public static final String ERROR_FACILITY_CODE_REQUIRED =
+      join(ERROR_PREFIX, FACILITY, CODE, REQUIRED);
+  public static final String ERROR_NOT_FOUND_FACILITY_TYPE =
+      join(ERROR_PREFIX, FACILITY, FACILITY_TYPE, NOT_FOUND);
+
+  public static final String ERROR_NOT_FOUND_GEO_ZONE =
+      join(ERROR_PREFIX, GEOGRAPHIC_ZONE, NOT_FOUND);
+  public static final String ERROR_GEO_ZONE_CODE_REQUIRED =
+      join(ERROR_PREFIX, GEOGRAPHIC_ZONE, CODE, REQUIRED);
+  public static final String ERROR_NOT_FOUND_GEO_LEVEL =
+      join(ERROR_PREFIX, GEOGRAPHIC_ZONE, LEVEL, NOT_FOUND);
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

@@ -22,10 +22,14 @@ import java.util.Optional;
 import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Location.LocationStatus;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
+import org.openlmis.hapifhir.i18n.Message;
+import org.openlmis.hapifhir.i18n.MessageKeys;
 import org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor;
 import org.openlmis.hapifhir.service.ResourceCommunicationService;
+import org.openlmis.hapifhir.service.ValidationMessageException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -83,7 +87,13 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
         .ifPresent(facility::setLocation);
 
     // mandatory
-    facility.setCode(location.getAlias().get(0).getValueNotNull());
+    facility.setCode(
+        Optional
+            .ofNullable(location.getAlias())
+            .map(list -> list.isEmpty() ? null : list.get(0))
+            .map(PrimitiveType::getValue)
+            .orElseThrow(() -> new ValidationMessageException(
+                new Message(MessageKeys.ERROR_FACILITY_CODE_REQUIRED))));
     facility.setGeographicZone(findGeographicZone(location.getPartOf()));
     facility.setType(getFacilityType());
     facility.setActive(location.getStatus() == LocationStatus.ACTIVE);
@@ -99,7 +109,10 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
 
   private FacilityTypeDto getFacilityType() {
     if (null == facilityType) {
-      facilityType = facilityTypeReferenceDataService.findOne(facilityTypeId);
+      facilityType = Optional
+          .ofNullable(facilityTypeReferenceDataService.findOne(facilityTypeId))
+          .orElseThrow(() -> new ValidationMessageException(
+              new Message(MessageKeys.ERROR_NOT_FOUND_FACILITY_TYPE, facilityTypeId)));
     }
 
     return facilityType;
@@ -112,6 +125,13 @@ public class FacilityCreatorInterceptor extends OpenLmisResourceCreatorIntercept
 
   private GeographicZoneDto findGeographicZone(Reference reference) {
     UUID idAsUuid = UUID.fromString(reference.getReferenceElement().getIdPart());
-    return geographicZoneReferenceDataService.findOne(idAsUuid);
+    GeographicZoneDto found = geographicZoneReferenceDataService.findOne(idAsUuid);
+
+    if (null == found) {
+      throw new ValidationMessageException(
+          new Message(MessageKeys.ERROR_NOT_FOUND_GEO_ZONE, idAsUuid));
+    }
+
+    return found;
   }
 }
