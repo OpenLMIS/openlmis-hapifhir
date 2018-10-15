@@ -16,27 +16,22 @@
 package org.openlmis.hapifhir.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor.IS_MANAGED_EXTERNALLY;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
-import java.util.Arrays;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
-import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +39,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -59,9 +53,6 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   private static final String API_KEY_PREFIX = "prefix";
   protected static final UUID LOCATION_ID = UUID.randomUUID();
 
-  @Mock(name = "myLocationDaoDstu3")
-  protected IFhirResourceDao<Location> locationRepository;
-
   @Mock
   @Getter
   private Location locationMock;
@@ -71,15 +62,6 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
   @Mock
   private Coding coding;
-
-  @Mock
-  private ServletRequestDetails details;
-
-  @Mock
-  private HttpServletRequest request;
-
-  @Mock
-  private HttpServletResponse response;
 
   @Mock
   private SecurityContext securityContext;
@@ -94,20 +76,12 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
   @Before
   public void setUp() {
-    when(locationRepository.read(locationId)).thenReturn(locationMock);
-
     when(locationMock.getPhysicalType()).thenReturn(physicalType);
     when(locationMock.getIdElement()).thenReturn(locationId);
 
     when(physicalType.getCoding()).thenReturn(Lists.newArrayList(coding));
 
     when(coding.getCode()).thenReturn(getSupportedType().toCode());
-
-    when(response.getHeader(HttpHeaders.CONTENT_LOCATION)).thenReturn(LOCATION_ID.toString());
-
-    when(details.getServletRequest()).thenReturn(request);
-    when(details.getServletResponse()).thenReturn(response);
-    when(details.getResourceName()).thenReturn("Location");
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.isClientOnly()).thenReturn(true);
@@ -126,8 +100,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
     // when
     prepareInterceptorForCreate(locationMock);
-    when(request.getMethod()).thenReturn("POST");
-    interceptor.processingCompletedNormally(details);
+    interceptor.resourceCreated(null, locationMock);
 
     // then
     verify(communicationService).update(resourceCaptor.capture());
@@ -146,8 +119,7 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
     // when
     prepareInterceptorForUpdate(locationMock);
-    when(request.getMethod()).thenReturn("PUT");
-    interceptor.processingCompletedNormally(details);
+    interceptor.resourceUpdated(null, null, locationMock);
 
     // then
     verify(communicationService).update(resourceCaptor.capture());
@@ -158,10 +130,15 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   }
 
   @Test(expected = IllegalStateException.class)
-  public void shouldThrowExceptionIfCodingCannotBeConvertedToEnum() {
+  public void shouldThrowExceptionIfCodingCannotBeConvertedToEnumForCreateEvent() {
     when(coding.getCode()).thenReturn("test-code");
-    when(request.getMethod()).thenReturn("POST");
-    getInterceptor().processingCompletedNormally(details);
+    getInterceptor().resourceCreated(null, locationMock);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void shouldThrowExceptionIfCodingCannotBeConvertedToEnumForUpdateEvent() {
+    when(coding.getCode()).thenReturn("test-code");
+    getInterceptor().resourceUpdated(null, null, locationMock);
   }
 
   @Test
@@ -186,41 +163,26 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
   }
 
   @Test
-  public void shouldNotHandleRequestIfMethodIsNotPostOrPut() {
-    Set<HttpMethod> methods = Arrays
-        .stream(HttpMethod.values())
-        .filter(method -> method != HttpMethod.POST)
-        .filter(method -> method != HttpMethod.PUT)
-        .collect(Collectors.toSet());
-
+  public void shouldIgnoreEventIfResourceIsNotLocation() {
     OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
 
-    for (HttpMethod method : methods) {
-      when(request.getMethod()).thenReturn(method.name());
-      interceptor.processingCompletedNormally(details);
-    }
+    IBaseResource resource = mock(Patient.class);
 
-    verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
+    interceptor.resourceCreated(null, resource);
+    interceptor.resourceUpdated(null, null, resource);
+
+    verifyZeroInteractions(securityContext, interceptor.getCommunicationService());
   }
 
   @Test
-  public void shouldNotHandleRequestIfResourceIsNotLocation() {
-    OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
-
-    when(details.getResourceName()).thenReturn("TestResource");
-    interceptor.processingCompletedNormally(details);
-
-    verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
-  }
-
-  @Test
-  public void shouldNotHandleRequestIfItIsFromReferenceDataService() {
+  public void shouldIgnoreEventIfItIsFromReferenceDataService() {
     OpenLmisResourceCreatorInterceptor<T> interceptor = getInterceptor();
 
     when(authentication.getOAuth2Request()).thenReturn(createAuthRequest("service-token"));
-    interceptor.processingCompletedNormally(details);
+    interceptor.resourceCreated(null, locationMock);
+    interceptor.resourceUpdated(null, null, locationMock);
 
-    verifyZeroInteractions(locationRepository, interceptor.getCommunicationService());
+    verifyZeroInteractions(interceptor.getCommunicationService());
   }
 
   protected abstract OpenLmisResourceCreatorInterceptor<T> getInterceptor();

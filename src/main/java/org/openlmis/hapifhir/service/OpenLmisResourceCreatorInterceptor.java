@@ -17,59 +17,50 @@ package org.openlmis.hapifhir.service;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & ExtraDataContainer>
-    extends InterceptorAdapter {
+    extends ServerOperationInterceptorAdapter {
 
   static final String IS_MANAGED_EXTERNALLY = "isManagedExternally";
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  @Autowired
-  @Qualifier("myLocationDaoDstu3")
-  private IFhirResourceDao<Location> locationRepository;
-
   @Value("${auth.server.clientId.apiKey.prefix}")
   private String apiKeyPrefix;
 
   @Override
-  public void processingCompletedNormally(ServletRequestDetails details) {
-    if (shouldIgnore(details)) {
-      logger.info(
-          "Request came from the reference data service. Skipping synchronization process."
-      );
+  public void resourceCreated(RequestDetails details, IBaseResource resource) {
+    handleEvent(resource);
+  }
+
+  @Override
+  public void resourceUpdated(RequestDetails details, IBaseResource oldResource,
+      IBaseResource newResource) {
+    handleEvent(newResource);
+  }
+
+  private void handleEvent(IBaseResource fhirResource) {
+    if (shouldIgnore(fhirResource)) {
       return;
     }
 
-    String contentLocation = details
-        .getServletResponse()
-        .getHeader(HttpHeaders.CONTENT_LOCATION);
-    IIdType locationId = new IdType(new UriType(contentLocation));
-    logger.debug("Load location with id: {}", locationId);
-    Location location = locationRepository.read(locationId);
+    Location location = (Location) fhirResource;
 
     List<T> resources = location
         .getPhysicalType()
@@ -98,10 +89,9 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
 
   protected abstract ResourceCommunicationService<T> getCommunicationService();
 
-  private boolean shouldIgnore(ServletRequestDetails details) {
-    HttpServletRequest request = details.getServletRequest();
-
-    if (incorrectRequestMethod(request) || incorrectResource(details)) {
+  private boolean shouldIgnore(IBaseResource resource) {
+    if (!(resource instanceof Location)) {
+      logger.info("Resource is not an instance of Location. Skipping synchronization process.");
       return true;
     }
 
@@ -113,37 +103,21 @@ public abstract class OpenLmisResourceCreatorInterceptor<T extends BaseDto & Ext
       OAuth2Authentication auth2Authentication = (OAuth2Authentication) authentication;
       String clientId = auth2Authentication.getOAuth2Request().getClientId();
 
-      return !auth2Authentication.isClientOnly() || !startsWith(clientId, apiKeyPrefix);
-    }
+      boolean result = !auth2Authentication.isClientOnly()
+          || !startsWith(clientId, apiKeyPrefix);
 
-    return true;
-  }
+      if (result) {
+        logger.info(
+            "Request came from the reference data service. Skipping synchronization process."
+        );
+      }
 
-  private boolean incorrectRequestMethod(HttpServletRequest request) {
-    logger.trace("Request method: {}", request.getMethod());
+      return result;
+    } else {
+      logger.info("Unknown authentication. Skipping synchronization process.");
 
-    boolean isNotPost = !"POST".equalsIgnoreCase(request.getMethod());
-    boolean isNotPut = !"PUT".equalsIgnoreCase(request.getMethod());
-
-    if (isNotPost && isNotPut) {
-      logger.debug("The request's method is not POST or PUT");
       return true;
     }
-
-    return false;
-  }
-
-  private boolean incorrectResource(ServletRequestDetails details) {
-    logger.trace("Resource name: {}", details.getResourceName());
-
-    boolean isNotLocation = !"Location".equalsIgnoreCase(details.getResourceName());
-
-    if (isNotLocation) {
-      logger.debug("The resource name is not equal to Location");
-      return true;
-    }
-
-    return false;
   }
 
   private LocationPhysicalType convertCodingToEnum(Coding coding) {
