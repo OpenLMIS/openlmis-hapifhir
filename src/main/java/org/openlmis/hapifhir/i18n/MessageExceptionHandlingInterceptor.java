@@ -55,6 +55,15 @@ public class MessageExceptionHandlingInterceptor extends InterceptorAdapter {
 
     Throwable newThrowable = throwable;
 
+    if (newThrowable instanceof BaseServerResponseException) {
+      BaseServerResponseException fhirException = (BaseServerResponseException) newThrowable;
+
+      if (fhirException.getCause() instanceof ExternalApiException
+          || fhirException.getCause() instanceof BaseMessageException) {
+        newThrowable = fhirException.getCause();
+      }
+    }
+
     if (newThrowable instanceof BaseMessageException) {
       BaseMessageException messageException = (BaseMessageException) newThrowable;
 

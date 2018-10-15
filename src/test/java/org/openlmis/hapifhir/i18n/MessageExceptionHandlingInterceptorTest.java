@@ -84,15 +84,30 @@ public class MessageExceptionHandlingInterceptorTest {
   @Before
   public void setUp() {
     interceptor = new MessageExceptionHandlingInterceptor(messageService, delegate);
+
+    when(fhirException.getStatusCode()).thenReturn(STATUS_CODE);
+    when(fhirException.getMessage()).thenReturn(ERROR_MESSAGE);
+    when(fhirException.getCause()).thenReturn(null);
+
+    when(messageException.getStatusCode()).thenReturn(STATUS_CODE);
+    when(messageException.asMessage()).thenReturn(MESSAGE);
+
+    when(externalApiException.getMessageLocalized()).thenReturn(EXTERNAL_MESSAGE);
+
+    when(messageService.localize(MESSAGE))
+        .thenAnswer(invocation -> {
+          Message message = invocation.getArgumentAt(0, Message.class);
+          return message.localMessage(messageSource, ENGLISH_LOCALE);
+        });
+
+    when(messageSource.getMessage(ERROR_MESSAGE, null, ENGLISH_LOCALE))
+        .thenReturn(ERROR_MESSAGE);
   }
 
   @Test
-  public void shouldPassExceptionWithoutChangesToDelegateMethodIfExceptionIsNotMessageBased()
+  public void shouldPassExceptionWithoutChangesIfExceptionIsNotMessageBased()
       throws ServletException {
     // when
-    when(fhirException.getStatusCode()).thenReturn(STATUS_CODE);
-    when(fhirException.getMessage()).thenReturn(ERROR_MESSAGE);
-
     interceptor.preProcessOutgoingException(details, fhirException, request);
 
     // then
@@ -108,40 +123,37 @@ public class MessageExceptionHandlingInterceptorTest {
   }
 
   @Test
-  public void shouldModifyExceptionBeforeItWillBeMovedToSuperMethodIfExceptionIsMessageBased()
+  public void shouldModifyExceptionIfExceptionIsMessageBased()
       throws ServletException {
     // when
-    when(messageException.getStatusCode()).thenReturn(STATUS_CODE);
-    when(messageException.asMessage()).thenReturn(MESSAGE);
-
-    when(messageService.localize(MESSAGE))
-        .thenAnswer(invocation -> {
-          Message message = invocation.getArgumentAt(0, Message.class);
-          return message.localMessage(messageSource, ENGLISH_LOCALE);
-        });
-
-    when(messageSource.getMessage(ERROR_MESSAGE, null, ENGLISH_LOCALE))
-        .thenReturn(ERROR_MESSAGE);
-
     interceptor.preProcessOutgoingException(details, messageException, request);
 
     // then
     verify(delegate)
         .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
 
-    BaseServerResponseException capturedException = exceptionCaptor.getValue();
-    assertThat(capturedException)
-        .isInstanceOf(LocalizedMessageException.class)
-        .hasFieldOrPropertyWithValue("statusCode", STATUS_CODE)
-        .hasFieldOrPropertyWithValue("message", ERROR_MESSAGE);
+    assertException(STATUS_CODE);
   }
 
   @Test
-  public void shouldModifyExceptionBeforeItWillBeMovedToSuperMethodIfExceptionIsExternalApi()
+  public void shouldModifyExceptionIfExceptionIsInternalAndCauseIsMessageBased()
       throws ServletException {
     // when
-    when(externalApiException.getMessageLocalized()).thenReturn(EXTERNAL_MESSAGE);
+    when(fhirException.getCause()).thenReturn(messageException);
 
+    interceptor.preProcessOutgoingException(details, fhirException, request);
+
+    // then
+    verify(delegate)
+        .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
+
+    assertException(STATUS_CODE);
+  }
+
+  @Test
+  public void shouldModifyExceptionIfExceptionIsExternalApi()
+      throws ServletException {
+    // when
     interceptor.preProcessOutgoingException(details, externalApiException, request);
 
     // then
@@ -149,10 +161,30 @@ public class MessageExceptionHandlingInterceptorTest {
         .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
     verifyZeroInteractions(messageService, messageSource);
 
+    assertException(HttpStatus.SC_BAD_REQUEST);
+  }
+
+  @Test
+  public void shouldModifyExceptionIfExceptionIsInternalAndCauseIsExternalApi()
+      throws ServletException {
+    // when
+    when(fhirException.getCause()).thenReturn(externalApiException);
+
+    interceptor.preProcessOutgoingException(details, fhirException, request);
+
+    // then
+    verify(delegate)
+        .preProcessOutgoingException(eq(details), exceptionCaptor.capture(), eq(request));
+    verifyZeroInteractions(messageService, messageSource);
+
+    assertException(HttpStatus.SC_BAD_REQUEST);
+  }
+
+  private void assertException(int statusCode) {
     BaseServerResponseException capturedException = exceptionCaptor.getValue();
     assertThat(capturedException)
         .isInstanceOf(LocalizedMessageException.class)
-        .hasFieldOrPropertyWithValue("statusCode", HttpStatus.SC_BAD_REQUEST)
+        .hasFieldOrPropertyWithValue("statusCode", statusCode)
         .hasFieldOrPropertyWithValue("message", ERROR_MESSAGE);
   }
 }
