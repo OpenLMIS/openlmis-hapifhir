@@ -31,7 +31,7 @@ public abstract class BaseMessageException extends RuntimeException {
   }
 
   /**
-   * Create a new exception with the given status code, message and, cause.
+   * Create a new exception with the given status code, message and cause.
    * @param message the message.
    * @param cause the cause of this exception.
    */
