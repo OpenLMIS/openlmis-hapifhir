@@ -18,10 +18,8 @@ package org.openlmis.hapifhir.config;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig.IdStrategyEnum;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -64,14 +62,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
     retVal.setLogExceptions(true);
     retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
     return retVal;
-  }
-
-  /**
-   * Demo subscription security interceptor.
-   */
-  @Bean(autowire = Autowire.BY_TYPE)
-  public IServerInterceptor subscriptionSecurityInterceptor() {
-    return new SubscriptionsRequireManualActivationInterceptorDstu3();
   }
 
   /**
