@@ -15,6 +15,10 @@
 
 package org.openlmis.hapifhir.service;
 
+/**
+ * The following exception presents situations where there is a call to an external service and the
+ * service returns response other than 200 OK.
+ */
 public class ExternalApiException extends RuntimeException {
 
   private final transient LocalizedMessageDto localizedMessage;
