@@ -44,7 +44,15 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
    */
   public T create(T payload) {
     logger.debug("Create resource {}: {}", getResultClass().getSimpleName(), payload);
-    return addOrUpdate("", payload, HttpMethod.POST);
+    RequestParameters parameters = RequestParameters.init();
+    RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
+
+    try {
+      return execute("", parameters, headers, payload, HttpMethod.POST, getResultClass())
+          .getBody();
+    } catch (HttpStatusCodeException exp) {
+      throw handleException(exp);
+    }
   }
 
   /**
@@ -53,16 +61,11 @@ public abstract class ResourceCommunicationService<T extends BaseDto>
   public T update(T payload) {
     logger.debug("Update resource {}: {}", getResultClass().getSimpleName(), payload);
     String resourceUrl = payload.getId().toString();
-
-    return addOrUpdate(resourceUrl, payload, HttpMethod.PUT);
-  }
-
-  private T addOrUpdate(String resourceUrl, T payload, HttpMethod method) {
     RequestParameters parameters = RequestParameters.init();
     RequestHeaders headers = RequestHeaders.init().setJsonAsContentType();
 
     try {
-      return execute(resourceUrl, parameters, headers, payload, method, getResultClass())
+      return execute(resourceUrl, parameters, headers, payload, HttpMethod.PUT, getResultClass())
           .getBody();
     } catch (HttpStatusCodeException exp) {
       throw handleException(exp);
