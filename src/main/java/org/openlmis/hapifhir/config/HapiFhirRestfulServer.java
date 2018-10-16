@@ -118,9 +118,15 @@ public class HapiFhirRestfulServer extends RestfulServer {
 
       try {
         super.service(request, response);
-        manager.commit(transaction);
+
+        if (!transaction.isCompleted()) {
+          manager.commit(transaction);
+        }
       } catch (Exception exp) {
-        manager.rollback(transaction);
+        if (!transaction.isCompleted()) {
+          manager.rollback(transaction);
+        }
+
         throw exp;
       }
     }
