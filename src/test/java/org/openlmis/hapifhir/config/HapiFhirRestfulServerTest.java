@@ -93,6 +93,16 @@ public class HapiFhirRestfulServerTest {
   }
 
   @Test
+  public void shouldNotCommitTransactionIfItItRollbackOnly() throws ServletException, IOException {
+    when(transactionStatus.isRollbackOnly()).thenReturn(true);
+
+    server.service(request, response);
+
+    verify(transactionManager, never()).commit(transactionStatus);
+    verify(transactionManager, never()).rollback(transactionStatus);
+  }
+
+  @Test
   public void shouldRollbackTransactionOnException() throws IOException {
     doThrow(new IOException()).when(response).sendError(anyInt(), anyString());
     when(transactionStatus.isCompleted()).thenReturn(false);
