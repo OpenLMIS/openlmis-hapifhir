@@ -29,11 +29,9 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.XmlParser;
-import java.io.ByteArrayInputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -150,29 +148,8 @@ public class HapiFhirRestfulServerTest {
     //given
     String body = "<Bundle><type value='transaction'/></Bundle>";
     when(request.getMethod()).thenReturn("POST");
-    when(request.getInputStream()).thenReturn(new ServletInputStream() {
-      ByteArrayInputStream bais = new ByteArrayInputStream(body.getBytes());
-
-      @Override
-      public boolean isFinished() {
-        return bais.available() == 0;
-      }
-
-      @Override
-      public boolean isReady() {
-        return true;
-      }
-
-      @Override
-      public void setReadListener(ReadListener listener) {
-        throw new UnsupportedOperationException("Not implemented");
-      }
-
-      @Override
-      public int read() {
-        return bais.read();
-      }
-    });
+    when(request.getRequestURI()).thenReturn("/hapifhir");
+    when(request.getInputStream()).thenReturn(new StringServletInputStream(body));
     mockStatic(FhirContext.class);
     FhirContext fhirCtx = mock(FhirContext.class);
     when(FhirContext.forDstu3()).thenReturn(fhirCtx);
@@ -181,6 +158,7 @@ public class HapiFhirRestfulServerTest {
     Bundle bundle = mock(Bundle.class);
     when(xmlParser.parseResource(Bundle.class, body)).thenReturn(bundle);
     when(bundle.getType()).thenReturn(BundleType.TRANSACTION);
+    when(context.getBean(ObjectMapper.class)).thenReturn(mock(ObjectMapper.class));
     
     //when
     server.service(request, response);
