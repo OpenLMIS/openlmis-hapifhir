@@ -15,6 +15,7 @@
 
 package org.openlmis.hapifhir.config;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -29,6 +30,11 @@ public class StringServletInputStreamTest {
   @Before
   public void setUp() {
     stream = new StringServletInputStream("test");
+  }
+  
+  @Test
+  public void isFinishedShouldBeFalse() {
+    assertFalse(stream.isFinished());
   }
   
   @Test

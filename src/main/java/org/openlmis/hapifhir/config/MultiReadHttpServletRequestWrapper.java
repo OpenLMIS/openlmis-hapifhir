@@ -45,10 +45,6 @@ public class MultiReadHttpServletRequestWrapper extends HttpServletRequestWrappe
           stringBuilder.append(charBuffer, 0, bytesRead);
         }
       }
-    } finally {
-      if (bufferedReader != null) {
-        bufferedReader.close();
-      }
     }
 
     body = stringBuilder.toString();
