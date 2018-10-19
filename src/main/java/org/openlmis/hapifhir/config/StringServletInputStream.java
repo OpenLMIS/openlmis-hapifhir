@@ -22,8 +22,10 @@ import javax.servlet.ServletInputStream;
 public class StringServletInputStream extends ServletInputStream {
 
   ByteArrayInputStream bais;
+  String str;
   
   StringServletInputStream(String str) {
+    this.str = str;
     bais = new ByteArrayInputStream(str.getBytes());
   }
 
@@ -45,5 +47,10 @@ public class StringServletInputStream extends ServletInputStream {
   @Override
   public int read() {
     return bais.read();
+  }
+  
+  @Override
+  public String toString() {
+    return str;
   }
 }

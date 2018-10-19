@@ -15,35 +15,29 @@
 
 package org.openlmis.hapifhir.config;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ReadListener;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MultiReadHttpServletRequestWrapperTest {
+public class StringServletInputStreamTest {
 
-  private static final String DEFAULT_BODY = "<test></test>";
-  
-  private HttpServletRequest request;
-
-  private MultiReadHttpServletRequestWrapper wrapper;
+  StringServletInputStream stream;
   
   @Before
-  public void setUp() throws IOException {
-    request = mock(HttpServletRequest.class);
-    when(request.getMethod()).thenReturn("POST");
-    when(request.getInputStream()).thenReturn(new StringServletInputStream(DEFAULT_BODY));
-    wrapper = new MultiReadHttpServletRequestWrapper(request);
+  public void setUp() {
+    stream = new StringServletInputStream("test");
   }
   
   @Test
-  public void shouldBuildBodyString() throws IOException {
-    assertEquals(DEFAULT_BODY, wrapper.getBody());
-    assertEquals(DEFAULT_BODY, (wrapper.getInputStream()).toString());
-    assertEquals(DEFAULT_BODY, wrapper.getReader().readLine());
+  public void isReadyShouldBeTrue() {
+    assertTrue(stream.isReady());
+  }
+  
+  @Test(expected = UnsupportedOperationException.class)
+  public void setReadListenerShouldNotBeSupported() {
+    stream.setReadListener(mock(ReadListener.class));
   }
 }
