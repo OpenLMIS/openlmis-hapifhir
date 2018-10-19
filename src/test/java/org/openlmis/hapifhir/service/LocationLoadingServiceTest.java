@@ -91,7 +91,11 @@ public class LocationLoadingServiceTest {
   public void loadGeographicZonesShouldLoad() {
     //given
     GeographicZoneDto geoZone1 = new GeographicZoneDtoDataBuilder().build();
-    GeographicZoneDto geoZone2 = new GeographicZoneDtoDataBuilder().build();
+    GeographicZoneDto geoZone2 = new GeographicZoneDtoDataBuilder()
+        .withLongitude(null)
+        .withLatitude(null)
+        .withParent(geoZone1)
+        .build();
     List<GeographicZoneDto> geoZones = Arrays.asList(geoZone1, geoZone2);
     PageDto<GeographicZoneDto> geoZonePage = new PageDto<>();
     geoZonePage.setContent(geoZones);
@@ -108,7 +112,11 @@ public class LocationLoadingServiceTest {
   public void loadFacilitiesShouldLoad() {
     //given
     FacilityDto facility1 = new FacilityDtoDataBuilder().build();
-    FacilityDto facility2 = new FacilityDtoDataBuilder().build();
+    FacilityDto facility2 = new FacilityDtoDataBuilder()
+        .withLocation(null)
+        .withActive(false)
+        .withEnabled(null)
+        .build();
     List<FacilityDto> facilities = Arrays.asList(facility1, facility2);
     when(facilityService.findAll()).thenReturn(facilities);
 

@@ -81,9 +81,23 @@ public class FacilityDtoDataBuilder {
     return facility;
   }
 
+  public FacilityDtoDataBuilder withLocation(Point location) {
+    this.location = location;
+    return this;
+  }
+
+  public FacilityDtoDataBuilder withActive(Boolean active) {
+    this.active = active;
+    return this;
+  }
+
+  public FacilityDtoDataBuilder withEnabled(Boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
+
   public FacilityDtoDataBuilder withId(UUID id) {
     this.id = id;
     return this;
   }
-
 }

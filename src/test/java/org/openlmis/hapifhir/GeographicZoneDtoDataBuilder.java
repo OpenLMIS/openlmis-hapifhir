@@ -81,6 +81,16 @@ public class GeographicZoneDtoDataBuilder {
     this.parent = parent;
     return this;
   }
+  
+  public GeographicZoneDtoDataBuilder withLongitude(Double longitude) {
+    this.longitude = longitude;
+    return this;
+  }
+
+  public GeographicZoneDtoDataBuilder withLatitude(Double latitude) {
+    this.latitude = latitude;
+    return this;
+  }
 
   public GeographicZoneDtoDataBuilder withId(UUID id) {
     this.id = id;

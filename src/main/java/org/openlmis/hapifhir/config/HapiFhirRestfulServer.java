@@ -188,13 +188,13 @@ public class HapiFhirRestfulServer extends RestfulServer {
           }
         }
       } catch (IOException ex) {
-        logger.error("Error reading the request body...");
+        logger.error("Error reading the request body, exception = {}", ex);
       } finally {
         if (bufferedReader != null) {
           try {
             bufferedReader.close();
           } catch (IOException ex) {
-            logger.error("Error closing bufferedReader...");
+            logger.error("Error closing bufferedReader, exception = {}", ex);
           }
         }
       }
