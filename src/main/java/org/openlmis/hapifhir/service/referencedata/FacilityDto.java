@@ -16,9 +16,8 @@
 package org.openlmis.hapifhir.service.referencedata;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vividsolutions.jts.geom.Point;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -41,15 +40,11 @@ public final class FacilityDto extends BaseDto implements ExtraDataContainer {
   private String name;
   private String description;
   private Boolean active;
-  private LocalDate goLiveDate;
-  private LocalDate goDownDate;
-  private String comment;
   private Boolean enabled;
-  private Boolean openLmisAccessible;
-  private List<SupportedProgramDto> supportedPrograms;
   private GeographicZoneDto geographicZone;
   private FacilityOperatorDto operator;
   private FacilityTypeDto type;
+  @JsonDeserialize(using = PointDeserializer.class)
   private Point location;
   private Map<String, String> extraData;
 }

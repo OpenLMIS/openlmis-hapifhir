@@ -15,20 +15,16 @@
 
 package org.openlmis.hapifhir;
 
-import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.openlmis.hapifhir.service.referencedata.FacilityDto;
 import org.openlmis.hapifhir.service.referencedata.FacilityOperatorDto;
 import org.openlmis.hapifhir.service.referencedata.FacilityTypeDto;
 import org.openlmis.hapifhir.service.referencedata.GeographicZoneDto;
-import org.openlmis.hapifhir.service.referencedata.SupportedProgramDto;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class FacilityDtoDataBuilder {
@@ -43,12 +39,7 @@ public class FacilityDtoDataBuilder {
   private FacilityTypeDto type;
   private FacilityOperatorDto operator;
   private Boolean active;
-  private LocalDate goLiveDate;
-  private LocalDate goDownDate;
-  private String comment;
   private Boolean enabled;
-  private Boolean openLmisAccessible;
-  private List<SupportedProgramDto> supportedPrograms;
   private Point location;
   private Map<String, String> extraData;
 
@@ -67,8 +58,6 @@ public class FacilityDtoDataBuilder {
     operator = null;
     active = true;
     enabled = true;
-    openLmisAccessible = true;
-    supportedPrograms = Lists.newArrayList();
     location = new GeometryFactory().createPoint(new Coordinate(54.5, 18.5));
     extraData = new HashMap<>();
   }
@@ -78,9 +67,8 @@ public class FacilityDtoDataBuilder {
    */
   public FacilityDto buildAsNew() {
     return new FacilityDto(
-        code, name, description, active, goLiveDate, goDownDate, comment, enabled,
-        openLmisAccessible, supportedPrograms, geographicZone, operator, type,
-        location, extraData);
+        code, name, description, active, enabled, geographicZone, operator, type, location,
+        extraData);
   }
 
   /**
