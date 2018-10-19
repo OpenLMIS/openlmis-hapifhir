@@ -31,7 +31,7 @@ public class StringServletInputStream extends ServletInputStream {
 
   @Override
   public boolean isFinished() {
-    return bais.available() == 0;
+    return false;
   }
 
   @Override

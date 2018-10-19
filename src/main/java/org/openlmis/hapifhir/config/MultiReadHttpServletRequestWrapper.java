@@ -23,16 +23,20 @@ import java.io.StringReader;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
 
 public class MultiReadHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
+  private final XLogger logger = XLoggerFactory.getXLogger(getClass());
+
   private final String body;
 
-  MultiReadHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
+  MultiReadHttpServletRequestWrapper(HttpServletRequest request) {
     super(request);
 
     StringBuilder stringBuilder = new StringBuilder();
-    BufferedReader bufferedReader = null;
+    BufferedReader bufferedReader;
 
     try (InputStream inputStream = request.getInputStream()) {
       if (inputStream != null) {
@@ -45,6 +49,8 @@ public class MultiReadHttpServletRequestWrapper extends HttpServletRequestWrappe
           stringBuilder.append(charBuffer, 0, bytesRead);
         }
       }
+    } catch (IOException exc) {
+      logger.warn("Could not read the request body, exception = {}", exc);
     }
 
     body = stringBuilder.toString();

@@ -33,17 +33,28 @@ public class MultiReadHttpServletRequestWrapperTest {
   private MultiReadHttpServletRequestWrapper wrapper;
   
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     request = mock(HttpServletRequest.class);
     when(request.getMethod()).thenReturn("POST");
-    when(request.getInputStream()).thenReturn(new StringServletInputStream(DEFAULT_BODY));
-    wrapper = new MultiReadHttpServletRequestWrapper(request);
   }
   
   @Test
   public void shouldBuildBodyString() throws IOException {
+    when(request.getInputStream()).thenReturn(new StringServletInputStream(DEFAULT_BODY));
+
+    wrapper = new MultiReadHttpServletRequestWrapper(request);
+
     assertEquals(DEFAULT_BODY, wrapper.getBody());
     assertEquals(DEFAULT_BODY, (wrapper.getInputStream()).toString());
     assertEquals(DEFAULT_BODY, wrapper.getReader().readLine());
+  }
+
+  @Test
+  public void shouldReturnEmptyStringWhenInputStreamThrowsException() throws IOException {
+    when(request.getInputStream()).thenThrow(new IOException());
+
+    wrapper = new MultiReadHttpServletRequestWrapper(request);
+
+    assertEquals("", wrapper.getBody());
   }
 }
