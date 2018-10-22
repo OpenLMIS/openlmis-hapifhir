@@ -20,11 +20,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.exceptions.base.MockitoException;
 
 public class MultiReadHttpServletRequestWrapperTest {
 
@@ -58,12 +56,5 @@ public class MultiReadHttpServletRequestWrapperTest {
     wrapper = new MultiReadHttpServletRequestWrapper(request);
 
     assertEquals("", wrapper.getBody());
-  }
-  
-  @Test(expected = MockitoException.class)
-  public void shouldThrowExceptionWhenInputStreamThrowsOtherException() throws IOException {
-    when(request.getInputStream()).thenThrow(new ServletException());
-
-    wrapper = new MultiReadHttpServletRequestWrapper(request);
   }
 }

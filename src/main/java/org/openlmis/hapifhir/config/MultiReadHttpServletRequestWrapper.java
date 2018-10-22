@@ -16,7 +16,6 @@
 package org.openlmis.hapifhir.config;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -49,7 +48,7 @@ public class MultiReadHttpServletRequestWrapper extends HttpServletRequestWrappe
           stringBuilder.append(charBuffer, 0, bytesRead);
         }
       }
-    } catch (IOException exc) {
+    } catch (Exception exc) {
       logger.warn("Could not read the request body, exception = {}", exc);
     }
 
