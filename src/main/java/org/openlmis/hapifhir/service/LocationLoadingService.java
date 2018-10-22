@@ -38,6 +38,7 @@ import org.openlmis.hapifhir.service.referencedata.FacilityDto;
 import org.openlmis.hapifhir.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.hapifhir.service.referencedata.GeographicZoneDto;
 import org.openlmis.hapifhir.service.referencedata.GeographicZoneReferenceDataService;
+import org.openlmis.hapifhir.service.referencedata.ReferenceDataVersionService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,9 @@ public class LocationLoadingService {
   private String serviceUrl;
 
   @Autowired
+  private ReferenceDataVersionService referenceDataVersionService;
+  
+  @Autowired
   private AuthService authService;
   
   @Autowired
@@ -66,7 +70,22 @@ public class LocationLoadingService {
   /**
    * Initialize FHIR client.
    */
-  public IGenericClient initialize() {
+  public IGenericClient initialize() throws InterruptedException {
+    //wait until reference data returns its version info
+    while (true) {
+      VersionDto version = null;
+      try {
+        version = referenceDataVersionService.getInfo();
+      } catch (Exception exc) {
+        logger.info("Reference data version not found, trying again, exception = " + exc);
+      }
+      if (null != version) {
+        logger.info("Reference data version found, load FHIR demo data");
+        break;
+      }
+      Thread.sleep(5000);
+    }
+
     logger.info("Initialize FHIR context");
     FhirContext ctx = FhirContext.forDstu3();
     //default socket timeout of 10s gets HTTP code 499

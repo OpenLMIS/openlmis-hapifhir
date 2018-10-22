@@ -42,6 +42,7 @@ import org.openlmis.hapifhir.service.referencedata.FacilityDto;
 import org.openlmis.hapifhir.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.hapifhir.service.referencedata.GeographicZoneDto;
 import org.openlmis.hapifhir.service.referencedata.GeographicZoneReferenceDataService;
+import org.openlmis.hapifhir.service.referencedata.ReferenceDataVersionService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,6 +51,9 @@ public class LocationLoadingServiceTest {
   private static final String BASE_URL = "http://localhost";
   private static final String ACCESS_TOKEN = UUID.randomUUID().toString();
 
+  @Mock
+  private ReferenceDataVersionService referenceDataVersionService;
+  
   @Mock
   private AuthService authService;
   
@@ -66,13 +70,14 @@ public class LocationLoadingServiceTest {
 
   @Before
   public void setUp() {
+    when(referenceDataVersionService.getInfo()).thenReturn(null, new VersionDto());
     when(authService.obtainAccessToken()).thenReturn(ACCESS_TOKEN);
     mockClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
     ReflectionTestUtils.setField(service, "serviceUrl", BASE_URL);
   }
   
   @Test
-  public void initializeShouldInitializeFhirClient() {
+  public void initializeShouldInitializeFhirClient() throws InterruptedException {
     //when
     IGenericClient client = service.initialize();
     

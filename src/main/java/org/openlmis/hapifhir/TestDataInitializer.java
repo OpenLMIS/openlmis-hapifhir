@@ -17,8 +17,6 @@ package org.openlmis.hapifhir;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.openlmis.hapifhir.service.LocationLoadingService;
-import org.openlmis.hapifhir.service.VersionDto;
-import org.openlmis.hapifhir.service.referencedata.ReferenceDataVersionService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +35,6 @@ public class TestDataInitializer implements CommandLineRunner {
   @Autowired
   LocationLoadingService locationLoadingService;
   
-  @Autowired
-  ReferenceDataVersionService referenceDataVersionService;
-  
   /**
    * Initializes test data.
    *
@@ -47,20 +42,6 @@ public class TestDataInitializer implements CommandLineRunner {
    */
   public void run(String... args) throws InterruptedException {
     logger.entry();
-
-    while (true) {
-      VersionDto version = null;
-      try {
-        version = referenceDataVersionService.getInfo();
-      } catch (Exception exc) {
-        logger.info("Reference data version not found, trying again");
-      }
-      if (null != version) {
-        logger.info("Reference data version found, load FHIR demo data");
-        break;
-      }
-      Thread.sleep(5000);
-    }
 
     IGenericClient client = locationLoadingService.initialize();
     locationLoadingService.loadGeographicZones(client);

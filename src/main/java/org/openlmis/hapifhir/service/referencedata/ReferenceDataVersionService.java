@@ -22,7 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 @Service
-public final class ReferenceDataVersionService extends BaseCommunicationService {
+public class ReferenceDataVersionService extends BaseCommunicationService {
 
   @Value("${service.url}")
   private String serviceUrl;
