@@ -115,12 +115,11 @@ public class HapiFhirRestfulServer extends RestfulServer {
     if ("POST".equalsIgnoreCase(request.getMethod())) {
       try {
         String reqBody = ((MultiReadHttpServletRequestWrapper) request).getBody();
-        logger.debug("Request body = {}", reqBody);
         Bundle bundle = FhirContext.forDstu3().newXmlParser().parseResource(Bundle.class, reqBody);
         BundleType bundleType = bundle.getType();
         isTransactionRequest = bundleType == BundleType.TRANSACTION;
       } catch (DataFormatException dfe) {
-        logger.debug("POST request body was not a Bundle, ignoring, exception = {}", dfe);
+        logger.debug("POST request body was not a Bundle, ignoring, exception = " + dfe);
       }
     }
 
