@@ -20,24 +20,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.XmlParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -140,31 +133,5 @@ public class HapiFhirRestfulServerTest {
     }
 
     verify(transactionManager, never()).commit(transactionStatus);
-  }
-  
-  @Test
-  @Ignore
-  public void shouldNotUseTransactionIfTransactionRequest() throws IOException, ServletException {
-    //given
-    String body = "<Bundle><type value='transaction'/></Bundle>";
-    when(request.getMethod()).thenReturn("POST");
-    when(request.getRequestURI()).thenReturn("/hapifhir");
-    when(request.getInputStream()).thenReturn(new StringServletInputStream(body));
-    mockStatic(FhirContext.class);
-    FhirContext fhirCtx = mock(FhirContext.class);
-    when(FhirContext.forDstu3()).thenReturn(fhirCtx);
-    XmlParser xmlParser = mock(XmlParser.class);
-    when(fhirCtx.newXmlParser()).thenReturn(xmlParser);
-    Bundle bundle = mock(Bundle.class);
-    when(xmlParser.parseResource(Bundle.class, body)).thenReturn(bundle);
-    when(bundle.getType()).thenReturn(BundleType.TRANSACTION);
-    when(context.getBean(ObjectMapper.class)).thenReturn(mock(ObjectMapper.class));
-    
-    //when
-    server.service(request, response);
-    
-    //then
-    verify(context, never()).getBean(PlatformTransactionManager.class);
-    verify(transactionManager, never()).getTransaction(any(TransactionDefinition.class));
   }
 }
