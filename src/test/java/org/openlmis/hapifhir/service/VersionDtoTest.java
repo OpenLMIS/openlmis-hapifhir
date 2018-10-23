@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2018 VillageReach
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
@@ -13,44 +13,12 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.hapifhir.config;
+package org.openlmis.hapifhir.service;
 
-import java.io.ByteArrayInputStream;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-
-public class StringServletInputStream extends ServletInputStream {
-
-  ByteArrayInputStream bais;
-  String str;
-  
-  StringServletInputStream(String str) {
-    this.str = str;
-    bais = new ByteArrayInputStream(str.getBytes());
-  }
+public class VersionDtoTest extends ToStringContractTest<VersionDto> {
 
   @Override
-  public boolean isFinished() {
-    return false;
-  }
-
-  @Override
-  public boolean isReady() {
-    return true;
-  }
-
-  @Override
-  public void setReadListener(ReadListener listener) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
-
-  @Override
-  public int read() {
-    return bais.read();
-  }
-  
-  @Override
-  public String toString() {
-    return str;
+  protected Class<VersionDto> getTestClass() {
+    return VersionDto.class;
   }
 }

@@ -15,7 +15,6 @@
 
 package org.openlmis.hapifhir;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.openlmis.hapifhir.service.LocationLoadingService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -43,9 +42,9 @@ public class TestDataInitializer implements CommandLineRunner {
   public void run(String... args) throws InterruptedException {
     logger.entry();
 
-    IGenericClient client = locationLoadingService.initialize();
-    locationLoadingService.loadGeographicZones(client);
-    locationLoadingService.loadFacilities(client);
+    locationLoadingService.waitForReferenceData();
+    locationLoadingService.loadGeographicZones();
+    locationLoadingService.loadFacilities();
     
     logger.exit();
   }

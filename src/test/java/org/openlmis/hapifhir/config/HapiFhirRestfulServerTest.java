@@ -25,7 +25,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,15 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.context.WebApplicationContext;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(FhirContext.class)
+@RunWith(MockitoJUnitRunner.class)
 public class HapiFhirRestfulServerTest {
 
   private static final String SERVICE_URL = "http://localhost";

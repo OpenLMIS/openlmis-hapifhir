@@ -15,20 +15,14 @@
 
 package org.openlmis.hapifhir.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.hapifhir.service.LocationLoadingService.CLIENT_SOCKET_TIMEOUT;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Location;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,13 +43,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class LocationLoadingServiceTest {
   
   private static final String BASE_URL = "http://localhost";
-  private static final String ACCESS_TOKEN = UUID.randomUUID().toString();
 
   @Mock
   private ReferenceDataVersionService referenceDataVersionService;
-  
-  @Mock
-  private AuthService authService;
   
   @Mock
   private GeographicZoneReferenceDataService geoZoneService;
@@ -63,33 +53,25 @@ public class LocationLoadingServiceTest {
   @Mock
   private FacilityReferenceDataService facilityService;
   
+  @Mock
+  private IFhirResourceDao<Location> locationDao;
+  
   @InjectMocks
   private LocationLoadingService service;
-  
-  private IGenericClient mockClient;
 
   @Before
   public void setUp() {
     when(referenceDataVersionService.getInfo()).thenReturn(null, new VersionDto());
-    when(authService.obtainAccessToken()).thenReturn(ACCESS_TOKEN);
-    mockClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
     ReflectionTestUtils.setField(service, "serviceUrl", BASE_URL);
   }
   
   @Test
-  public void initializeShouldInitializeFhirClient() throws InterruptedException {
+  public void waitForReferenceDataShouldWait() throws InterruptedException {
     //when
-    IGenericClient client = service.initialize();
+    service.waitForReferenceData();
     
     //then
-    assertEquals(CLIENT_SOCKET_TIMEOUT,
-        client.getFhirContext().getRestfulClientFactory().getSocketTimeout());
-    assertEquals(BASE_URL + "/hapifhir/", client.getServerBase());
-    assertEquals(1, client.getInterceptors().size());
-    assertTrue(client.getInterceptors().get(0) instanceof BearerTokenAuthInterceptor);
-    BearerTokenAuthInterceptor interceptor = 
-        (BearerTokenAuthInterceptor) client.getInterceptors().get(0);
-    assertEquals(ACCESS_TOKEN, interceptor.getToken());
+    verify(referenceDataVersionService, times(2)).getInfo();
   }
   
   @Test
@@ -107,10 +89,10 @@ public class LocationLoadingServiceTest {
     when(geoZoneService.getPage("", RequestParameters.init())).thenReturn(geoZonePage);
     
     //when
-    service.loadGeographicZones(mockClient);
+    service.loadGeographicZones();
 
     //then
-    verify(mockClient.transaction().withResources(anyListOf(Location.class))).execute();
+    verify(locationDao, times(2)).update(any(Location.class));
   }
 
   @Test
@@ -126,9 +108,9 @@ public class LocationLoadingServiceTest {
     when(facilityService.findAll()).thenReturn(facilities);
 
     //when
-    service.loadFacilities(mockClient);
+    service.loadFacilities();
 
     //then
-    verify(mockClient.transaction().withResources(anyListOf(Location.class))).execute();
+    verify(locationDao, times(2)).update(any(Location.class));
   }
 }

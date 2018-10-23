@@ -17,15 +17,12 @@ package org.openlmis.hapifhir.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import com.google.common.collect.Lists;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import com.vividsolutions.jts.geom.Point;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DecimalType;
@@ -42,6 +39,7 @@ import org.openlmis.hapifhir.service.referencedata.ReferenceDataVersionService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -49,8 +47,7 @@ import org.springframework.stereotype.Service;
 public class LocationLoadingService {
 
   private final XLogger logger = XLoggerFactory.getXLogger(getClass());
-  private static final int CHUNK_SIZE = 500;
-  static final int CLIENT_SOCKET_TIMEOUT = 30000;
+  private static final String KEY_URI_IDENTIFIER = "urn:ietf:rfc:3986";
 
   @Value("${service.url}")
   private String serviceUrl;
@@ -59,18 +56,19 @@ public class LocationLoadingService {
   private ReferenceDataVersionService referenceDataVersionService;
   
   @Autowired
-  private AuthService authService;
-  
-  @Autowired
   private GeographicZoneReferenceDataService geographicZoneService;
 
   @Autowired
   private FacilityReferenceDataService facilityService;
 
+  @Autowired
+  @Qualifier("myLocationDaoDstu3")
+  private IFhirResourceDao<Location> locationDao;
+
   /**
-   * Initialize FHIR client.
+   * Wait for Reference Data service to be available.
    */
-  public IGenericClient initialize() throws InterruptedException {
+  public void waitForReferenceData() throws InterruptedException {
     //wait until reference data returns its version info
     while (true) {
       VersionDto version = null;
@@ -85,80 +83,46 @@ public class LocationLoadingService {
       }
       Thread.sleep(5000);
     }
-
-    logger.info("Initialize FHIR context");
-    FhirContext ctx = FhirContext.forDstu3();
-    //default socket timeout of 10s gets HTTP code 499
-    ctx.getRestfulClientFactory().setSocketTimeout(CLIENT_SOCKET_TIMEOUT);
-
-    logger.info("Create generic client");
-    IGenericClient client = ctx.newRestfulGenericClient(serviceUrl + "/hapifhir/");
-
-    // Need to generate service token for the REST call
-    logger.info("Create bearer token interceptor and register it");
-    BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(
-        authService.obtainAccessToken());
-    client.registerInterceptor(authInterceptor);
-    
-    return client;
   }
 
   /**
    * Load geographic zones into FHIR datastore.
    */
-  public void loadGeographicZones(IGenericClient client) {
+  @Transactional
+  public void loadGeographicZones() {
 
     logger.info("Get geographic zones");
-    List<GeographicZoneDto> geographicZones = geographicZoneService.getPage("", 
+    List<GeographicZoneDto> geographicZones = geographicZoneService.getPage("",
         RequestParameters.init()).getContent();
+
     //Need to sort by level, so that parents are added first for the partOf reference for later adds
     logger.info("Sort geographic zones");
     geographicZones.sort(Comparator.comparing(obj -> obj.getLevel().getLevelNumber()));
 
-    logger.info("Loop through geographic zone chunks");
-    for (List<GeographicZoneDto> geoZoneChunk : Lists.partition(geographicZones, CHUNK_SIZE)) {
-
-      logger.info("Convert geographic zone chunk to location chunk");
-      List<Location> geoZoneLocations = geoZoneChunk.stream()
-          .map(this::getLocationFor)
-          .collect(Collectors.toList());
-
-      logger.info("Save geographic zone location chunk in transaction");
-      client.transaction()
-          .withResources(geoZoneLocations)
-          .execute();
-    }
+    logger.info("Save geographic zones");
+    geographicZones.forEach(
+        geographicZone -> locationDao.update(buildLocationFrom(geographicZone)));
   }
 
   /**
    * Load facilities into FHIR datastore.
    */
-  public void loadFacilities(IGenericClient client) {
+  @Transactional
+  public void loadFacilities() {
     logger.info("Get facilities");
     List<FacilityDto> facilities = facilityService.findAll();
 
-    logger.info("Loop through facility chunks");
-    for (List<FacilityDto> facilityChunk : Lists.partition(facilities, CHUNK_SIZE)) {
-
-      logger.info("Convert facility chunk to location chunk");
-      List<Location> facilityLocations = facilityChunk.stream()
-          .map(this::getLocationFor)
-          .collect(Collectors.toList());
-
-      logger.info("Save facility location chunk in transaction");
-      client.transaction()
-          .withResources(facilityLocations)
-          .execute();
-    }
+    logger.info("Save facilities");
+    facilities.forEach(facility -> locationDao.update(buildLocationFrom(facility)));
   }
   
-  private Location getLocationFor(GeographicZoneDto geographicZone) {
+  private Location buildLocationFrom(GeographicZoneDto geographicZone) {
     Location location = new Location();
     location.setId(geographicZone.getId().toString());
     location.addAlias(geographicZone.getCode());
     location.setName(geographicZone.getName());
     location.addIdentifier()
-        .setSystem("urn:ietf:rfc:3986")
+        .setSystem(KEY_URI_IDENTIFIER)
         .setValue(serviceUrl + "/api/geographicLevels/" + geographicZone.getLevel().getId());
     if (null != geographicZone.getLongitude() && null != geographicZone.getLatitude()) {
       LocationPositionComponent position = new LocationPositionComponent(
@@ -179,14 +143,14 @@ public class LocationLoadingService {
     return location;
   }
   
-  private Location getLocationFor(FacilityDto facility) {
+  private Location buildLocationFrom(FacilityDto facility) {
     Location location = new Location();
     location.setId(facility.getId().toString());
     location.addAlias(facility.getCode());
     location.setName(facility.getName());
     location.setDescription(facility.getDescription());
     location.addIdentifier()
-        .setSystem("urn:ietf:rfc:3986")
+        .setSystem(KEY_URI_IDENTIFIER)
         .setValue(serviceUrl + "/api/facilityTypes/" + facility.getType().getId());
     Point facilityLocation = facility.getLocation();
     if (null != facilityLocation) {

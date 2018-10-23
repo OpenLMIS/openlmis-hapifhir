@@ -21,7 +21,6 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -37,12 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.openlmis.util.Version;
-import org.slf4j.ext.XLogger;
-import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -55,8 +50,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Component
 public class HapiFhirRestfulServer extends RestfulServer {
-
-  private final XLogger logger = XLoggerFactory.getXLogger(getClass());
 
   private static final long serialVersionUID = 1L;
 
@@ -108,20 +101,7 @@ public class HapiFhirRestfulServer extends RestfulServer {
   protected void service(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
-    request = new MultiReadHttpServletRequestWrapper(request);
     String uri = request.getRequestURI();
-
-    boolean isTransactionRequest = false;
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-      try {
-        String reqBody = ((MultiReadHttpServletRequestWrapper) request).getBody();
-        Bundle bundle = FhirContext.forDstu3().newXmlParser().parseResource(Bundle.class, reqBody);
-        BundleType bundleType = bundle.getType();
-        isTransactionRequest = bundleType == BundleType.TRANSACTION;
-      } catch (DataFormatException dfe) {
-        logger.debug("POST request body was not a Bundle, ignoring, exception = " + dfe);
-      }
-    }
 
     if ("/hapifhir".equalsIgnoreCase(uri)) {
       // workaround for the problem with retrieving information about the service version
@@ -130,10 +110,6 @@ public class HapiFhirRestfulServer extends RestfulServer {
 
       ObjectMapper mapper = myAppCtx.getBean(ObjectMapper.class);
       mapper.writeValue(response.getWriter(), new Version());
-    } else if (isTransactionRequest) {
-      // if request is already a transaction, we should not run it in a transaction, as HAPI FHIR
-      // does not allow running a transaction request in a transaction
-      super.service(request, response);
     } else {
       // workaround for the problem which has been described in the following link:
       // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
