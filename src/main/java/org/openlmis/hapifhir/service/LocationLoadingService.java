@@ -125,8 +125,8 @@ public class LocationLoadingService {
         .setSystem(KEY_URI_IDENTIFIER)
         .setValue(serviceUrl + "/api/geographicLevels/" + geographicZone.getLevel().getId());
     location.addIdentifier()
-        .setSystem(KEY_URI_IDENTIFIER)
-        .setValue(serviceUrl + "/api/geographicZones/" + geographicZone.getId());
+        .setSystem(serviceUrl)
+        .setValue(geographicZone.getId().toString());
     if (null != geographicZone.getLongitude() && null != geographicZone.getLatitude()) {
       LocationPositionComponent position = new LocationPositionComponent(
           new DecimalType(geographicZone.getLongitude()),
@@ -156,8 +156,8 @@ public class LocationLoadingService {
         .setSystem(KEY_URI_IDENTIFIER)
         .setValue(serviceUrl + "/api/facilityTypes/" + facility.getType().getId());
     location.addIdentifier()
-        .setSystem(KEY_URI_IDENTIFIER)
-        .setValue(serviceUrl + "/api/facilities/" + facility.getId());
+        .setSystem(serviceUrl)
+        .setValue(facility.getId().toString());
     Point facilityLocation = facility.getLocation();
     if (null != facilityLocation) {
       LocationPositionComponent position = new LocationPositionComponent(
