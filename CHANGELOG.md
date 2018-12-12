@@ -1,4 +1,4 @@
-1.0.0 / WIP
+1.0.0 / 2018-12-12
 ==================
 
 Released openlmis-hapifhir 1.0.0 as part of openlmis-ref-distro 3.5. This was the first stable release of openlmis-hapifhir.
