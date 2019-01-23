@@ -18,19 +18,26 @@ package org.openlmis.hapifhir.config;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig.IdStrategyEnum;
+import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.transaction.PlatformTransactionManager;
 
 
 @Configuration
 @EntityScan("ca.uhn.fhir.jpa.entity")
 @PropertySource("classpath:application.properties")
 public class FhirServerConfig extends BaseJavaConfigDstu3 {
+
+  @Autowired
+  private PlatformTransactionManager transactionManager;
 
   /**
    * A bean that configures Dao.
@@ -75,6 +82,13 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
     bean.setLoadOnStartup(1);
 
     return bean;
+  }
+
+  @Bean
+  @Lazy
+  @Override
+  public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
+    return new TransactionSubscriptionRestHookInterceptor(transactionManager);
   }
 
 }
