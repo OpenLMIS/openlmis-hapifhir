@@ -22,14 +22,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TransactionSubscriptionRestHookInterceptor extends SubscriptionRestHookInterceptor {
 
   private SubscriptionDeliveringRestHookSubscriber deliverySubscriber;
+  private PlatformTransactionManager transactionManager;
 
   TransactionSubscriptionRestHookInterceptor(PlatformTransactionManager transactionManager) {
-    deliverySubscriber = new TransactionSubscriptionDeliveringRestHookSubscriber(
-        getSubscriptionDao(), getChannelType(), this, transactionManager);
+    this.transactionManager = transactionManager;
   }
 
   @Override
   protected void registerDeliverySubscriber() {
+    if (null == deliverySubscriber) {
+      deliverySubscriber = new TransactionSubscriptionDeliveringRestHookSubscriber(
+          getSubscriptionDao(), getChannelType(), this, transactionManager);
+    }
+
     getDeliveryChannel().subscribe(deliverySubscriber);
   }
 
