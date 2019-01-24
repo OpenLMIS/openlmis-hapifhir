@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -126,7 +127,7 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
       for (String next : headers) {
         if (isNotBlank(next)) {
           LOGGER.debug("Set header: {}", next);
-          client.registerInterceptor(new SimpleRequestHeaderInterceptor(next));
+          client.registerInterceptor(new CustomRequestHeaderInterceptor(next));
         }
       }
     }
@@ -134,5 +135,25 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
     LOGGER.debug("Delivering payload");
     deliverPayload(theMessage, subscription, payloadType, client);
     LOGGER.debug("Delivered payload");
+  }
+
+  // This class is exactly the same as the parent class. Added loggers to checks what happens.
+  private static final class CustomRequestHeaderInterceptor
+      extends SimpleRequestHeaderInterceptor {
+
+    CustomRequestHeaderInterceptor(String header) {
+      super(header);
+    }
+
+    @Override
+    public void interceptRequest(IHttpRequest theRequest) {
+      LOGGER.debug("Header name: {}", getHeaderName());
+      LOGGER.debug("Header value: {}", getHeaderValue());
+
+      if (isNotBlank(getHeaderName())) {
+        LOGGER.debug("Set header {} with value {}", getHeaderName(), getHeaderValue());
+        theRequest.addHeader(getHeaderName(), getHeaderValue());
+      }
+    }
   }
 }
