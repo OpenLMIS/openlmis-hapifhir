@@ -15,20 +15,10 @@
 
 package org.openlmis.hapifhir.config;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
-import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import java.util.List;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +57,7 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
 
     try {
       LOGGER.debug("Handling message");
-      super.handleMessage(message);
+      parentHandleMessage(message);
 
       if (!transaction.isCompleted() && !transaction.isRollbackOnly()) {
         LOGGER.debug("Commit transaction");
@@ -86,75 +76,9 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
     }
   }
 
-  // This method is exactly the same as in the parent class. Added loggers to checks what happens.
-  @Override
-  public void handleMessage(ResourceDeliveryMessage theMessage) {
-    CanonicalSubscription subscription = theMessage.getSubscription();
-
-    // Grab the endpoint from the subscription
-    String endpointUrl = subscription.getEndpointUrl();
-    LOGGER.debug("Send request to {}", endpointUrl);
-
-    // Grab the payload type (encoding mimetype) from the subscription
-    String payloadString = subscription.getPayloadString();
-    EncodingEnum payloadType = null;
-    if (payloadString != null) {
-      if (payloadString.contains(";")) {
-        payloadString = payloadString.substring(0, payloadString.indexOf(';'));
-      }
-      payloadString = payloadString.trim();
-      payloadType = EncodingEnum.forContentType(payloadString);
-    }
-
-    LOGGER.debug("Payload as string: {}", payloadString);
-    LOGGER.debug("Payload type: {}", payloadType);
-
-    // Create the client request
-    getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-    IGenericClient client = null;
-    if (isNotBlank(endpointUrl)) {
-      client = getContext().newRestfulGenericClient(endpointUrl);
-      LOGGER.debug("Created RESTful generic client for {}", endpointUrl);
-
-      // Additional headers specified in the subscription
-      List<String> headers = subscription.getHeaders();
-      LOGGER.debug("Try to set the following headers {}", headers);
-
-      for (String next : headers) {
-        if (isNotBlank(next)) {
-          LOGGER.debug("Set header: {}", next);
-          client.registerInterceptor(new CustomRequestHeaderInterceptor(next));
-        }
-      }
-
-      LoggingInterceptor loggingInterceptor = new LoggingInterceptor(true);
-      loggingInterceptor.setLogger(LOGGER);
-
-      client.registerInterceptor(loggingInterceptor);
-    }
-
-    LOGGER.debug("Delivering payload");
-    deliverPayload(theMessage, subscription, payloadType, client);
-    LOGGER.debug("Delivered payload");
+  @VisibleForTesting
+  void parentHandleMessage(Message<?> message) {
+    super.handleMessage(message);
   }
 
-  // This class is exactly the same as the parent class. Added loggers to checks what happens.
-  private static final class CustomRequestHeaderInterceptor
-      extends SimpleRequestHeaderInterceptor {
-
-    CustomRequestHeaderInterceptor(String header) {
-      super(header);
-    }
-
-    @Override
-    public void interceptRequest(IHttpRequest theRequest) {
-      LOGGER.debug("Header name: {}", getHeaderName());
-      LOGGER.debug("Header value: {}", getHeaderValue());
-
-      if (isNotBlank(getHeaderName())) {
-        LOGGER.debug("Set header {} with value {}", getHeaderName(), getHeaderValue());
-        theRequest.addHeader(getHeaderName(), getHeaderValue());
-      }
-    }
-  }
 }
