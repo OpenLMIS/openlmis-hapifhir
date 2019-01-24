@@ -17,15 +17,20 @@ package org.openlmis.hapifhir.config;
 
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public class TransactionSubscriptionRestHookInterceptor extends SubscriptionRestHookInterceptor {
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(TransactionSubscriptionRestHookInterceptor.class);
 
   private SubscriptionDeliveringRestHookSubscriber deliverySubscriber;
   private PlatformTransactionManager transactionManager;
 
   TransactionSubscriptionRestHookInterceptor(PlatformTransactionManager transactionManager) {
     this.transactionManager = transactionManager;
+    LOGGER.trace("Created TransactionSubscriptionRestHookInterceptor instance");
   }
 
   @Override
@@ -33,13 +38,19 @@ public class TransactionSubscriptionRestHookInterceptor extends SubscriptionRest
     if (null == deliverySubscriber) {
       deliverySubscriber = new TransactionSubscriptionDeliveringRestHookSubscriber(
           getSubscriptionDao(), getChannelType(), this, transactionManager);
+      LOGGER.trace("Initialized delivery subscriber");
     }
 
+    LOGGER.debug("Subscribing to delivery channel");
     getDeliveryChannel().subscribe(deliverySubscriber);
+    LOGGER.debug("Subscribed to delivery channel");
   }
 
   @Override
   protected void unregisterDeliverySubscriber() {
+    LOGGER.debug("Unsubscribing to delivery channel");
     getDeliveryChannel().unsubscribe(deliverySubscriber);
+    LOGGER.debug("Unsubscribed to delivery channel");
+
   }
 }

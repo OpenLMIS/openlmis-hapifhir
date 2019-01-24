@@ -19,6 +19,8 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubscriber;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,6 +31,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 class TransactionSubscriptionDeliveringRestHookSubscriber
     extends SubscriptionDeliveringRestHookSubscriber {
 
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(TransactionSubscriptionDeliveringRestHookSubscriber.class);
+
   private PlatformTransactionManager transactionManager;
 
   TransactionSubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> subscriptionDao,
@@ -36,26 +41,37 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
       PlatformTransactionManager transactionManager) {
     super(subscriptionDao, channelType, subscriptionInterceptor);
     this.transactionManager = transactionManager;
+    LOGGER.trace("Created TransactionSubscriptionDeliveringRestHookSubscriber instance");
+
   }
 
   @Override
   public void handleMessage(Message<?> message) throws MessagingException {
     // workaround for the problem which has been described in the following link:
     // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
+    LOGGER.trace("Create transaction definition");
     TransactionDefinition definition = new DefaultTransactionDefinition();
+
+    LOGGER.debug("Get/create transaction");
     TransactionStatus transaction = transactionManager.getTransaction(definition);
 
     try {
+      LOGGER.debug("Handling message");
       super.handleMessage(message);
 
       if (!transaction.isCompleted() && !transaction.isRollbackOnly()) {
+        LOGGER.debug("Commit transaction");
         transactionManager.commit(transaction);
       }
+
+      LOGGER.debug("Handled message");
     } catch (Exception exp) {
       if (!transaction.isCompleted()) {
+        LOGGER.debug("Rollback transaction");
         transactionManager.rollback(transaction);
       }
 
+      LOGGER.error("Exception has been thrown while message has been handled", exp);
       throw exp;
     }
   }
