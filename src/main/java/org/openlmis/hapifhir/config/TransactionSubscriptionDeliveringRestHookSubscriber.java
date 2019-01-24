@@ -15,14 +15,22 @@
 
 package org.openlmis.hapifhir.config;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
+import java.util.List;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -46,7 +54,7 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
   }
 
   @Override
-  public void handleMessage(Message<?> message) throws MessagingException {
+  public void handleMessage(Message<?> message) {
     // workaround for the problem which has been described in the following link:
     // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
     LOGGER.trace("Create transaction definition");
@@ -74,5 +82,52 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
       LOGGER.error("Exception has been thrown while message has been handled", exp);
       throw exp;
     }
+  }
+
+  // This method is exactly the same as in the parent class. Added loggers to checks what happens.
+  @Override
+  public void handleMessage(ResourceDeliveryMessage theMessage) {
+    CanonicalSubscription subscription = theMessage.getSubscription();
+
+    // Grab the endpoint from the subscription
+    String endpointUrl = subscription.getEndpointUrl();
+    LOGGER.debug("Send request to {}", endpointUrl);
+
+    // Grab the payload type (encoding mimetype) from the subscription
+    String payloadString = subscription.getPayloadString();
+    EncodingEnum payloadType = null;
+    if (payloadString != null) {
+      if (payloadString.contains(";")) {
+        payloadString = payloadString.substring(0, payloadString.indexOf(';'));
+      }
+      payloadString = payloadString.trim();
+      payloadType = EncodingEnum.forContentType(payloadString);
+    }
+
+    LOGGER.debug("Payload as string: {}", payloadString);
+    LOGGER.debug("Payload type: {}", payloadType);
+
+    // Create the client request
+    getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+    IGenericClient client = null;
+    if (isNotBlank(endpointUrl)) {
+      client = getContext().newRestfulGenericClient(endpointUrl);
+      LOGGER.debug("Created RESTful generic client for {}", endpointUrl);
+
+      // Additional headers specified in the subscription
+      List<String> headers = subscription.getHeaders();
+      LOGGER.debug("Try to set the following headers {}", headers);
+
+      for (String next : headers) {
+        if (isNotBlank(next)) {
+          LOGGER.debug("Set header: {}", next);
+          client.registerInterceptor(new SimpleRequestHeaderInterceptor(next));
+        }
+      }
+    }
+
+    LOGGER.debug("Delivering payload");
+    deliverPayload(theMessage, subscription, payloadType, client);
+    LOGGER.debug("Delivered payload");
   }
 }
