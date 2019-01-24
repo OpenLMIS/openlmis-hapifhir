@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubsc
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import java.util.List;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
@@ -111,7 +112,11 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
     getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     IGenericClient client = null;
     if (isNotBlank(endpointUrl)) {
+      LoggingInterceptor loggingInterceptor = new LoggingInterceptor(true);
+      loggingInterceptor.setLogger(LOGGER);
+
       client = getContext().newRestfulGenericClient(endpointUrl);
+      client.registerInterceptor(loggingInterceptor);
       LOGGER.debug("Created RESTful generic client for {}", endpointUrl);
 
       // Additional headers specified in the subscription
