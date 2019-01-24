@@ -113,11 +113,7 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
     getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     IGenericClient client = null;
     if (isNotBlank(endpointUrl)) {
-      LoggingInterceptor loggingInterceptor = new LoggingInterceptor(true);
-      loggingInterceptor.setLogger(LOGGER);
-
       client = getContext().newRestfulGenericClient(endpointUrl);
-      client.registerInterceptor(loggingInterceptor);
       LOGGER.debug("Created RESTful generic client for {}", endpointUrl);
 
       // Additional headers specified in the subscription
@@ -130,6 +126,11 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
           client.registerInterceptor(new CustomRequestHeaderInterceptor(next));
         }
       }
+
+      LoggingInterceptor loggingInterceptor = new LoggingInterceptor(true);
+      loggingInterceptor.setLogger(LOGGER);
+
+      client.registerInterceptor(loggingInterceptor);
     }
 
     LOGGER.debug("Delivering payload");
