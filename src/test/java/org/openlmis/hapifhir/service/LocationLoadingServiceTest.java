@@ -105,7 +105,9 @@ public class LocationLoadingServiceTest {
         .withEnabled(null)
         .build();
     List<FacilityDto> facilities = Arrays.asList(facility1, facility2);
-    when(facilityService.findAll()).thenReturn(facilities);
+    PageDto<FacilityDto> facilityPage = new PageDto<>();
+    facilityPage.setContent(facilities);
+    when(facilityService.getPage("", RequestParameters.init())).thenReturn(facilityPage);
 
     //when
     service.loadFacilities();
