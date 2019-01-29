@@ -92,8 +92,9 @@ public class LocationLoadingService {
   public void loadGeographicZones() {
 
     logger.info("Get geographic zones");
-    List<GeographicZoneDto> geographicZones = geographicZoneService.getPage("",
-        RequestParameters.init()).getContent();
+    List<GeographicZoneDto> geographicZones = geographicZoneService
+        .getPage("", RequestParameters.init())
+        .getContent();
 
     //Need to sort by level, so that parents are added first for the partOf reference for later adds
     logger.info("Sort geographic zones");
@@ -110,7 +111,9 @@ public class LocationLoadingService {
   @Transactional
   public void loadFacilities() {
     logger.info("Get facilities");
-    List<FacilityDto> facilities = facilityService.findAll();
+    List<FacilityDto> facilities = facilityService
+        .getPage("", RequestParameters.init())
+        .getContent();
 
     logger.info("Save facilities");
     facilities.forEach(facility -> locationDao.update(buildLocationFrom(facility)));
