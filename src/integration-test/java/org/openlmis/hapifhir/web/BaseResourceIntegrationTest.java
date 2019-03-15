@@ -27,7 +27,7 @@ import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import javax.annotation.PostConstruct;
-import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.r4.model.Location;
 import org.junit.runner.RunWith;
 import org.openlmis.hapifhir.OAuth2AuthenticationDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ public abstract class BaseResourceIntegrationTest {
   @MockBean
   private RemoteTokenServices tokenServices;
 
-  @SpyBean(name = "myLocationDaoDstu3")
+  @SpyBean(name = "myLocationDaoR4")
   IFhirResourceDao<Location> locationActions;
 
   RestAssuredClient restAssured;

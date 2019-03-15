@@ -64,10 +64,10 @@ dependencies {
 
     compile 'org.thymeleaf:thymeleaf-spring5:3.0.9.RELEASE'
 
-    compile 'ca.uhn.hapi.fhir:hapi-fhir-base:3.4.0'
-    compile 'ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:3.4.0'
-    compile 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:3.4.0'
-    compile 'ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:3.4.0'
+    compile 'ca.uhn.hapi.fhir:hapi-fhir-base:3.7.0'
+    compile 'ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:3.7.0'
+    compile 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:3.7.0'
+    compile 'ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:3.7.0'
     compile 'org.apache.commons:commons-dbcp2:2.1.1'
 
 

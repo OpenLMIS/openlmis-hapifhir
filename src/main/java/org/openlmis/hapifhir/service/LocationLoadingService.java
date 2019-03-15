@@ -23,14 +23,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
-import org.hl7.fhir.dstu3.model.Location.LocationStatus;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Location.LocationPositionComponent;
+import org.hl7.fhir.r4.model.Location.LocationStatus;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.LocationPhysicalType;
 import org.openlmis.hapifhir.service.referencedata.FacilityDto;
 import org.openlmis.hapifhir.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.hapifhir.service.referencedata.GeographicZoneDto;
@@ -62,7 +62,7 @@ public class LocationLoadingService {
   private FacilityReferenceDataService facilityService;
 
   @Autowired
-  @Qualifier("myLocationDaoDstu3")
+  @Qualifier("myLocationDaoR4")
   private IFhirResourceDao<Location> locationDao;
 
   /**

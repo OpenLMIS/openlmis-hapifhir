@@ -18,8 +18,8 @@ package org.openlmis.hapifhir.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
+import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.r4.model.Meta;
 import org.openlmis.util.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,16 +68,16 @@ public class HapiFhirRestfulServer extends RestfulServer {
   protected void initialize() throws ServletException {
     super.initialize();
 
-    setFhirContext(FhirContext.forDstu3());
+    setFhirContext(FhirContext.forR4());
 
-    List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
+    List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersR4", List.class);
     setResourceProviders(beans);
 
-    setPlainProviders(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
+    setPlainProviders(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 
-    IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean(
-        "mySystemDaoDstu3", IFhirSystemDao.class);
-    JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this,
+    IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, Meta> systemDao = myAppCtx.getBean(
+        "mySystemDaoR4", IFhirSystemDao.class);
+    JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this,
         systemDao, myAppCtx.getBean(DaoConfig.class));
     confProvider.setImplementationDescription("Example Server");
     setServerConformanceProvider(confProvider);

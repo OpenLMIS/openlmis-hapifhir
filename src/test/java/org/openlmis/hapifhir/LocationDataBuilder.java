@@ -15,7 +15,7 @@
 
 package org.openlmis.hapifhir;
 
-import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.r4.model.Location;
 
 public class LocationDataBuilder {
   private Location location;

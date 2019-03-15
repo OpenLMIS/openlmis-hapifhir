@@ -21,12 +21,12 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.util.UUID;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Location.LocationPositionComponent;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.codesystems.LocationPhysicalType;
 import org.hl7.fhir.instance.model.IdType;
 import org.junit.Before;
 import org.junit.Test;
