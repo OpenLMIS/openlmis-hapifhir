@@ -15,19 +15,22 @@
 
 package org.openlmis.hapifhir.config;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionDeliveringRestHookSubscriber;
 import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+@Primary
+@Component
+@Scope("prototype")
 class TransactionSubscriptionDeliveringRestHookSubscriber
     extends SubscriptionDeliveringRestHookSubscriber {
 
@@ -36,17 +39,15 @@ class TransactionSubscriptionDeliveringRestHookSubscriber
 
   private PlatformTransactionManager transactionManager;
 
-  TransactionSubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> subscriptionDao,
-      SubscriptionChannelType channelType, BaseSubscriptionInterceptor subscriptionInterceptor,
+  TransactionSubscriptionDeliveringRestHookSubscriber(
       PlatformTransactionManager transactionManager) {
-    super(subscriptionDao, channelType, subscriptionInterceptor);
     this.transactionManager = transactionManager;
     LOGGER.trace("Created TransactionSubscriptionDeliveringRestHookSubscriber instance");
 
   }
 
   @Override
-  public void handleMessage(Message<?> message) {
+  public void handleMessage(Message message) {
     // workaround for the problem which has been described in the following link:
     // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
     LOGGER.trace("Create transaction definition");

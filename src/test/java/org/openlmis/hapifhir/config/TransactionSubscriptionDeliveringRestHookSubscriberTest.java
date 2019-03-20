@@ -15,7 +15,6 @@
 
 package org.openlmis.hapifhir.config;
 
-import static org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
@@ -25,8 +24,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,12 +44,6 @@ public class TransactionSubscriptionDeliveringRestHookSubscriberTest {
   private PlatformTransactionManager transactionManager;
 
   @Mock
-  private IFhirResourceDao<?> subscriptionDao;
-
-  @Mock
-  private BaseSubscriptionInterceptor subscriptionInterceptor;
-
-  @Mock
   private TransactionStatus transactionStatus;
 
   @Mock
@@ -62,8 +53,7 @@ public class TransactionSubscriptionDeliveringRestHookSubscriberTest {
 
   @Before
   public void setUp() {
-    subscriber = spy(new TransactionSubscriptionDeliveringRestHookSubscriber(
-        subscriptionDao, RESTHOOK, subscriptionInterceptor, transactionManager));
+    subscriber = spy(new TransactionSubscriptionDeliveringRestHookSubscriber(transactionManager));
 
     willDoNothing().given(subscriber).parentHandleMessage(message);
     given(transactionManager.getTransaction(any(DefaultTransactionDefinition.class)))
