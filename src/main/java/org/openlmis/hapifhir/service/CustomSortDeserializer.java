@@ -42,6 +42,6 @@ public class CustomSortDeserializer extends JsonDeserializer<Sort> {
       orders.add(new Sort.Order(direction, property));
     }
 
-    return new Sort(orders);
+    return Sort.by(orders);
   }
 }

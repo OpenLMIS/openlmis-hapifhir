@@ -1,7 +1,7 @@
 version: "2"
 services:
   hapifhir:
-    image: openlmis/dev:4.2
+    image: openlmis/dev:5
     ports:
       - "5005:5005"
       - "8080:8080"

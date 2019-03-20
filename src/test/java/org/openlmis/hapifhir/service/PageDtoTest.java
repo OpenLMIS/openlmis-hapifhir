@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +44,7 @@ public class PageDtoTest extends ToStringContractTest<PageDto> {
     assertThat(pageDto.hasNext()).isFalse();
     assertThat(pageDto.hasPrevious()).isFalse();
     assertThat(pageDto.nextPageable()).isNull();
-    assertThat(pageDto.previousPageable()).isEqualTo(new PageRequest(0, 10));
+    assertThat(pageDto.previousPageable()).isEqualTo(PageRequest.of(0, 10));
 
     Iterator<String> iterator = pageDto.iterator();
     assertThat(iterator.hasNext()).isTrue();
@@ -54,7 +54,7 @@ public class PageDtoTest extends ToStringContractTest<PageDto> {
 
   @Test
   public void shouldConvertContentToOtherType() {
-    Converter<String, Integer> converter = Integer::valueOf;
+    Function<String, Integer> converter = Integer::valueOf;
     String value = "10";
 
     Page<Integer> pageDto = new PageDto<>(getPage(value)).map(converter);
@@ -66,7 +66,7 @@ public class PageDtoTest extends ToStringContractTest<PageDto> {
   }
 
   private Page<String> getPage(String value) {
-    Pageable pageable = new PageRequest(0, 10);
+    Pageable pageable = PageRequest.of(0, 10);
 
     List<String> values = Lists.newArrayList(value);
 

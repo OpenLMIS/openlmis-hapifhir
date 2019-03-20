@@ -96,7 +96,7 @@ public class MessageExceptionHandlingInterceptorTest {
 
     when(messageService.localize(MESSAGE))
         .thenAnswer(invocation -> {
-          Message message = invocation.getArgumentAt(0, Message.class);
+          Message message = invocation.getArgument(0);
           return message.localMessage(messageSource, ENGLISH_LOCALE);
         });
 
