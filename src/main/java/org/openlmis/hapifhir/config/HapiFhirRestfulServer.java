@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -42,10 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.context.WebApplicationContext;
 
 @Component
@@ -95,6 +92,10 @@ public class HapiFhirRestfulServer extends RestfulServer {
     }
 
     setServerAddressStrategy(new HardcodedServerAddressStrategy(serviceUrl + "/hapifhir/"));
+
+    SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx
+        .getBean(SubscriptionInterceptorLoader.class);
+    subscriptionInterceptorLoader.registerInterceptors();
   }
 
   @Override
@@ -111,25 +112,7 @@ public class HapiFhirRestfulServer extends RestfulServer {
       ObjectMapper mapper = myAppCtx.getBean(ObjectMapper.class);
       mapper.writeValue(response.getWriter(), new Version());
     } else {
-      // workaround for the problem which has been described in the following link:
-      // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
-      TransactionDefinition definition = new DefaultTransactionDefinition();
-      PlatformTransactionManager manager = myAppCtx.getBean(PlatformTransactionManager.class);
-      TransactionStatus transaction = manager.getTransaction(definition);
-
-      try {
-        super.service(request, response);
-
-        if (!transaction.isCompleted() && !transaction.isRollbackOnly()) {
-          manager.commit(transaction);
-        }
-      } catch (Exception exp) {
-        if (!transaction.isCompleted()) {
-          manager.rollback(transaction);
-        }
-
-        throw exp;
-      }
+      super.service(request, response);
     }
   }
 }

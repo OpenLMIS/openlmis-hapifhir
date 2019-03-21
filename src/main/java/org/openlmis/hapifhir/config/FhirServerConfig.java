@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig.IdStrategyEnum;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import org.hl7.fhir.instance.model.Subscription.SubscriptionChannelType;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +43,8 @@ public class FhirServerConfig extends BaseJavaConfigR4 {
     retVal.setAllowExternalReferences(true);
     retVal.setAllowMultipleDelete(true);
     retVal.setResourceServerIdStrategy(IdStrategyEnum.UUID);
+    retVal.setEnableInMemorySubscriptionMatching(false);
+    retVal.addSupportedSubscriptionType(SubscriptionChannelType.RESTHOOK);
 
     return retVal;
   }

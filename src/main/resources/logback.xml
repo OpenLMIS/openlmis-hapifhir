@@ -11,6 +11,10 @@
         <appender-ref ref="SYSLOG"/>
     </logger>
 
+    <logger name="ca.uhn.fhir" level="DEBUG" additivity="false">
+        <appender-ref ref="SYSLOG"/>
+    </logger>
+
     <!-- Define the root logger log level -->
     <root level="INFO">
         <appender-ref ref="SYSLOG"/>
