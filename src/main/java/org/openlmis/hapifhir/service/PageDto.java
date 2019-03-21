@@ -106,7 +106,7 @@ public final class PageDto<T> implements Page<T> {
     checkNotNull(converter);
 
     List<S> result = content.stream().map(converter::apply).collect(Collectors.toList());
-    Pageable pageable = new PageRequest(number, size, sort);
+    Pageable pageable = PageRequest.of(number, size, sort);
     Page<S> page = new PageImpl<>(result, pageable, totalElements);
 
     return new PageDto<>(page);
