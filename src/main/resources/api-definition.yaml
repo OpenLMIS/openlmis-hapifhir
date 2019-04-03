@@ -195,7 +195,7 @@ traits:
         401:
           body:
             application/json:
-  /Measuer:
+  /Measure:
     displayName: Measure
     get:
       is: [ fhir-resource, secured ]
