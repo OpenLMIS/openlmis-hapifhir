@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import java.util.Arrays;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -29,7 +30,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +48,7 @@ import org.springframework.data.domain.Sort;
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public final class PageDto<T> implements Page<T> {
+
   private boolean last;
   private boolean first;
 
@@ -90,22 +91,22 @@ public final class PageDto<T> implements Page<T> {
 
   @Override
   public Pageable nextPageable() {
-    return hasNext() ? new PageRequest(number + 1, size, sort) : null;
+    return hasNext() ? PageRequest.of(number + 1, size, sort) : null;
   }
 
   @Override
   public Pageable previousPageable() {
     return hasPrevious()
-        ? new PageRequest(number - 1, size, sort)
-        : new PageRequest(0, size, sort);
+        ? PageRequest.of(number - 1, size, sort)
+        : PageRequest.of(0, size, sort);
   }
 
   @Override
-  public <S> Page<S> map(Converter<? super T, ? extends S> converter) {
+  public <S> Page<S> map(Function<? super T, ? extends S> converter) {
     checkNotNull(converter);
 
-    List<S> result = content.stream().map(converter::convert).collect(Collectors.toList());
-    Pageable pageable = new PageRequest(number, size, sort);
+    List<S> result = content.stream().map(converter::apply).collect(Collectors.toList());
+    Pageable pageable = PageRequest.of(number, size, sort);
     Page<S> page = new PageImpl<>(result, pageable, totalElements);
 
     return new PageDto<>(page);

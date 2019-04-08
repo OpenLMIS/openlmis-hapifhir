@@ -20,22 +20,22 @@ import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARE
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.ObjectMapperConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
+import guru.nidi.ramltester.restassured3.RestAssuredClient;
+import io.restassured.RestAssured;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.config.RestAssuredConfig;
 import javax.annotation.PostConstruct;
-import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.r4.model.Location;
 import org.junit.runner.RunWith;
 import org.openlmis.hapifhir.OAuth2AuthenticationDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
@@ -75,7 +75,7 @@ public abstract class BaseResourceIntegrationTest {
   @MockBean
   private RemoteTokenServices tokenServices;
 
-  @SpyBean(name = "myLocationDaoDstu3")
+  @SpyBean(name = "myLocationDaoR4")
   IFhirResourceDao<Location> locationActions;
 
   RestAssuredClient restAssured;
@@ -95,7 +95,7 @@ public abstract class BaseResourceIntegrationTest {
 
     RamlDefinition ramlDefinition = RamlLoaders.fromClasspath()
         .load("api-definition-raml.yaml").ignoringXheaders();
-    restAssured = ramlDefinition.createRestAssured();
+    restAssured = ramlDefinition.createRestAssured3();
   }
 
   /**

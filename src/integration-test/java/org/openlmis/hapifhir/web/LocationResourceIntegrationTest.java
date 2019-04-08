@@ -23,10 +23,10 @@ import static org.mockito.Matchers.any;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import com.jayway.restassured.response.ValidatableResponse;
+import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.hapifhir.LocationDataBuilder;

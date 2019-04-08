@@ -195,3 +195,71 @@ traits:
         401:
           body:
             application/json:
+  /Measure:
+    displayName: Measure
+    get:
+      is: [ fhir-resource, secured ]
+      description: Retrieve FHIR measure based on passed parameters
+      queryParameters:
+        identifier:
+          displayName: identifier
+          description: An identifier for the measure
+          type: string
+          required: false
+          repeat: false
+        name:
+          displayName: name
+          description: The name of the measure
+          type: string
+          required: false
+          repeat: false
+      responses:
+        200:
+          body:
+            application/json:
+        401:
+          body:
+            application/json:
+  /MeasureReport:
+    displayName: MeasureReport
+    get:
+      is: [ fhir-resource, secured ]
+      description: Retrieve FHIR measureReport based on passed parameters
+      queryParameters:
+        identifier:
+          displayName: identifier
+          description: An identifier for the measureReport
+          type: string
+          required: false
+          repeat: false
+        measure:
+          displayName: measure
+          description: Searches for measureReports that were generated for a specific measure
+          type: string
+          required: false
+          repeat: false
+        period:
+          displayName: period
+          description: Searches for measureReports for a specified time period
+          type: string
+          required: false
+          repeat: false
+        location:
+          displayName: location
+          description: Searches for measureReports for a specified location
+          type: string
+          required: false
+          repeat: false
+        last-updated:
+          displayName: last-updated
+          description: Searches for measureReports updated since the specified date
+          type: string
+          required: false
+          repeat: false
+      responses:
+        200:
+          body:
+            application/json:
+        401:
+          body:
+            application/json:

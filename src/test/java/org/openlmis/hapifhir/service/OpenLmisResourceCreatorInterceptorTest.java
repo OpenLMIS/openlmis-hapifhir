@@ -25,13 +25,13 @@ import static org.openlmis.hapifhir.service.OpenLmisResourceCreatorInterceptor.I
 import com.google.common.collect.Lists;
 import java.util.UUID;
 import lombok.Getter;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.codesystems.LocationPhysicalType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.codesystems.LocationPhysicalType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -196,15 +196,15 @@ public abstract class OpenLmisResourceCreatorInterceptorTest
 
   /**
    * Instructions in this method should prepare the interceptor to a create event. Instructions
-   * should be related only with the minimal happy part for the event. Other paths should be
-   * tested separately in subclass.
+   * should be related only with the minimal happy part for the event. Other paths should be tested
+   * separately in subclass.
    */
   protected abstract void prepareInterceptorForCreate(Location locationMock);
 
   /**
    * Instructions in this method should prepare the interceptor to a update event. Instructions
-   * should be related only with the minimal happy part for the event. Other paths should be
-   * tested separately in subclass.
+   * should be related only with the minimal happy part for the event. Other paths should be tested
+   * separately in subclass.
    */
   protected abstract void prepareInterceptorForUpdate(Location locationMock);
 

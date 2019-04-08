@@ -18,9 +18,10 @@ package org.openlmis.hapifhir.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
+import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -36,16 +37,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.r4.model.Meta;
 import org.openlmis.util.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.context.WebApplicationContext;
 
 @Component
@@ -68,16 +65,16 @@ public class HapiFhirRestfulServer extends RestfulServer {
   protected void initialize() throws ServletException {
     super.initialize();
 
-    setFhirContext(FhirContext.forDstu3());
+    setFhirContext(FhirContext.forR4());
 
-    List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
+    List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersR4", List.class);
     setResourceProviders(beans);
 
-    setPlainProviders(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
+    setPlainProviders(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 
-    IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean(
-        "mySystemDaoDstu3", IFhirSystemDao.class);
-    JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this,
+    IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, Meta> systemDao = myAppCtx.getBean(
+        "mySystemDaoR4", IFhirSystemDao.class);
+    JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this,
         systemDao, myAppCtx.getBean(DaoConfig.class));
     confProvider.setImplementationDescription("Example Server");
     setServerConformanceProvider(confProvider);
@@ -95,6 +92,10 @@ public class HapiFhirRestfulServer extends RestfulServer {
     }
 
     setServerAddressStrategy(new HardcodedServerAddressStrategy(serviceUrl + "/hapifhir/"));
+
+    SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx
+        .getBean(SubscriptionInterceptorLoader.class);
+    subscriptionInterceptorLoader.registerInterceptors();
   }
 
   @Override
@@ -111,25 +112,7 @@ public class HapiFhirRestfulServer extends RestfulServer {
       ObjectMapper mapper = myAppCtx.getBean(ObjectMapper.class);
       mapper.writeValue(response.getWriter(), new Version());
     } else {
-      // workaround for the problem which has been described in the following link:
-      // https://groups.google.com/forum/#!topic/hapi-fhir/Hm2I3UPACCw
-      TransactionDefinition definition = new DefaultTransactionDefinition();
-      PlatformTransactionManager manager = myAppCtx.getBean(PlatformTransactionManager.class);
-      TransactionStatus transaction = manager.getTransaction(definition);
-
-      try {
-        super.service(request, response);
-
-        if (!transaction.isCompleted() && !transaction.isRollbackOnly()) {
-          manager.commit(transaction);
-        }
-      } catch (Exception exp) {
-        if (!transaction.isCompleted()) {
-          manager.rollback(transaction);
-        }
-
-        throw exp;
-      }
+      super.service(request, response);
     }
   }
 }

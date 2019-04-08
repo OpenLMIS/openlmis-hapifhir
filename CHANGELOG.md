@@ -1,5 +1,8 @@
-1.0.1 / WIP
+2.0.0 / WIP
 ==================
+
+Breaking changes:
+* [OLMIS-6066](https://openlmis.atlassian.net/browse/OLMIS-6066): Changed HAPI FHIR version to 3.7.0 and change structure to r4
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-3773](https://openlmis.atlassian.net/browse/OLMIS-3773): Adjusted the service to use the new version of facility search endpoint
