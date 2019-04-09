@@ -70,7 +70,7 @@ public class HapiFhirRestfulServer extends RestfulServer {
     List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersR4", List.class);
     setResourceProviders(beans);
 
-    setPlainProviders(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
+    registerProviders(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 
     IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, Meta> systemDao = myAppCtx.getBean(
         "mySystemDaoR4", IFhirSystemDao.class);
