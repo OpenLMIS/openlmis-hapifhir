@@ -103,8 +103,9 @@ public class HapiFhirRestfulServer extends RestfulServer {
       throws ServletException, IOException {
 
     String uri = request.getRequestURI();
+    String queryString = request.getQueryString();
 
-    if ("/hapifhir".equalsIgnoreCase(uri)) {
+    if ("/hapifhir".equalsIgnoreCase(uri) && null == queryString) {
       // workaround for the problem with retrieving information about the service version
       response.setStatus(HttpStatus.SC_OK);
       response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
