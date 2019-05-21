@@ -7,6 +7,8 @@ Breaking changes:
 Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-3773](https://openlmis.atlassian.net/browse/OLMIS-3773): Adjusted the service to use the new version of facility search endpoint
 * [OLMIS-4531](https://openlmis.atlassian.net/browse/OLMIS-4531): Added compressing HTTP POST responses.
+* [OLMIS-6307](https://openlmis.atlassian.net/browse/OLMIS-6307): Fixed the pagination links given in responses.
+* [OLMIS-6245](https://openlmis.atlassian.net/browse/OLMIS-6245): Enabled in-memory subscription searching.
 
 1.0.0 / 2018-12-12
 ==================
