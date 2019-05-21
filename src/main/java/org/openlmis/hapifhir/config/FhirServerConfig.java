@@ -43,7 +43,7 @@ public class FhirServerConfig extends BaseJavaConfigR4 {
     retVal.setAllowExternalReferences(true);
     retVal.setAllowMultipleDelete(true);
     retVal.setResourceServerIdStrategy(IdStrategyEnum.UUID);
-    retVal.setEnableInMemorySubscriptionMatching(false);
+    retVal.setEnableInMemorySubscriptionMatching(true);
     retVal.addSupportedSubscriptionType(SubscriptionChannelType.RESTHOOK);
 
     return retVal;
