@@ -11,7 +11,6 @@ properties([
 pipeline {
     agent none
     options {
-        buildDiscarder(logRotator(numToKeepStr: '15'))
         disableConcurrentBuilds()
         skipStagesAfterUnstable()
     }
@@ -45,6 +44,20 @@ pipeline {
                         STAGING_VERSION += "-STAGING"
                     }
                     currentBuild.displayName += " - " + VERSION
+
+                    if (CURRENT_BRANCH.equals("master") || CURRENT_BRANCH.startsWith("rel-")) {
+                        properties([buildDiscarder(logRotator(
+                            numToKeepStr: '15'
+                        ))])
+                    }
+                    else {
+                        properties([buildDiscarder(logRotator(
+                            artifactDaysToKeepStr: '3',
+                            artifactNumToKeepStr: '1',
+                            daysToKeepStr: '7',
+                            numToKeepStr: '3'
+                        ))])
+                    }
                 }
             }
             post {
