@@ -11,12 +11,7 @@ properties([
 pipeline {
     agent none
     options {
-        buildDiscarder(logRotator(
-            artifactDaysToKeepStr: env.GIT_BRANCH.equals("master") || env.GIT_BRANCH.startsWith("rel-") ? '' : '3',
-            artifactNumToKeepStr: env.GIT_BRANCH.equals("master") || env.GIT_BRANCH.startsWith("rel-") ? '' : '1',
-            daysToKeepStr: env.GIT_BRANCH.equals("master") || env.GIT_BRANCH.startsWith("rel-") ? '' : '7',
-            numToKeepStr: env.GIT_BRANCH.equals("master") || env.GIT_BRANCH.startsWith("rel-") ? '15' : '3'
-        ))
+        buildDiscarder(logRotator(numToKeepStr: '15'))
         disableConcurrentBuilds()
         skipStagesAfterUnstable()
     }
