@@ -117,6 +117,11 @@ pipeline {
             }
         }
         stage('Parallel: Sonar analysis and contract tests') {
+            when {
+                expression {
+                    return VERSION.endsWith("SNAPSHOT")
+                }
+            }
             parallel {
                 stage('Sonar analysis') {
                     agent any
