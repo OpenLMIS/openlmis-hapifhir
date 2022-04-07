@@ -7,7 +7,7 @@ services:
       - log
     env_file: .env
   db:
-    image: openlmis/postgres:9.6
+    image: openlmis/postgres:12-debezium
     env_file: .env
   log:
     image: openlmis/rsyslog:1

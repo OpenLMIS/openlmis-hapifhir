@@ -3,6 +3,9 @@
 Improvement:
 * [OLMIS-6983](https://openlmis.atlassian.net/browse/OLMIS-6983): Sonar analysis and contract tests runs only for snapshots
 
+* Breaking changes:
+* [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use postgres v12
+
 2.0.0 / 2019-05-27
 ==================
 
