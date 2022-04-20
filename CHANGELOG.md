@@ -5,7 +5,7 @@
 * [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use postgres v12
 
 Improvements:
-* [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use openlmis/service-base:6
+* [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use openlmis/service-base:6.1
 
 2.0.1 / 2021-10-29
 ==================
