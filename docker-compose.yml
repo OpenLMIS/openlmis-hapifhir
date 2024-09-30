@@ -10,6 +10,6 @@ services:
     image: openlmis/postgres:12-debezium
     env_file: .env
   log:
-    image: openlmis/rsyslog:1
+    image: openlmis/rsyslog:3
     volumes:
       - '../logs/hapifhir-service:/var/log'
