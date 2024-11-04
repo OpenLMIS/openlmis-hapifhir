@@ -1,4 +1,7 @@
-2.0.3 / 31.10.2024
+2.0.4 / wip
+==================
+
+2.0.3 / 2024-10-31
 ==================
 Improvements:
 * [OIS-48](https://openlmis.atlassian.net/browse/OIS-48): Update service base images to versions without known vulnerabilities
