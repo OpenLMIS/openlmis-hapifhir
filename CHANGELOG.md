@@ -1,8 +1,11 @@
-2.0.4 / wip
+2.0.4 / 2025-03-31
 ==================
+
+Minor coverage updates and code analysis improvements.
 
 2.0.3 / 2024-10-31
 ==================
+
 Improvements:
 * [OIS-48](https://openlmis.atlassian.net/browse/OIS-48): Update service base images to versions without known vulnerabilities
 
@@ -17,6 +20,7 @@ Improvements:
 
 2.0.1 / 2021-10-29
 ==================
+
 Improvement:
 * [OLMIS-6983](https://openlmis.atlassian.net/browse/OLMIS-6983): Sonar analysis and contract tests runs only for snapshots
 
