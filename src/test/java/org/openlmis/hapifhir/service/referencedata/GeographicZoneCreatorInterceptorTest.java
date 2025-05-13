@@ -21,8 +21,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.util.UUID;
-import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Location.LocationPositionComponent;
 import org.hl7.fhir.r4.model.Reference;

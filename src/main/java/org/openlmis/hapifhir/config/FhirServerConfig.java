@@ -19,15 +19,13 @@ import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig.IdStrategyEnum;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-import org.hl7.fhir.instance.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-
 
 @Configuration
 @EntityScan({"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity"})
@@ -44,7 +42,7 @@ public class FhirServerConfig extends BaseJavaConfigR4 {
     retVal.setAllowMultipleDelete(true);
     retVal.setResourceServerIdStrategy(IdStrategyEnum.UUID);
     retVal.setEnableInMemorySubscriptionMatching(true);
-    retVal.addSupportedSubscriptionType(SubscriptionChannelType.RESTHOOK);
+    retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 
     return retVal;
   }
@@ -60,14 +58,13 @@ public class FhirServerConfig extends BaseJavaConfigR4 {
    * @return LoggingInterceptor
    */
   @Bean
-  public IServerInterceptor loggingInterceptor() {
+  public LoggingInterceptor loggingInterceptor() {
     LoggingInterceptor retVal = new LoggingInterceptor();
     retVal.setLoggerName("hapi.fhir.access");
-    retVal.setMessageFormat(
-        "Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] "
-            + "Operation[${operationType} ${operationName} ${idOrResourceName}] "
-            + "UA[${requestHeader.user-agent}] Params[${requestParameters}] "
-            + "ResponseEncoding[${responseEncodingNoDefault}]");
+    retVal.setMessageFormat("Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] "
+        + "Operation[${operationType} ${operationName} ${idOrResourceName}] "
+        + "UA[${requestHeader.user-agent}] Params[${requestParameters}] "
+        + "ResponseEncoding[${responseEncodingNoDefault}]");
     retVal.setLogExceptions(true);
     retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
     return retVal;
@@ -85,6 +82,5 @@ public class FhirServerConfig extends BaseJavaConfigR4 {
 
     return bean;
   }
-
 
 }

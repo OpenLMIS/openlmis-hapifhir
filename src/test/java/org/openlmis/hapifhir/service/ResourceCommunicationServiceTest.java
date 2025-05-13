@@ -20,10 +20,11 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
@@ -126,10 +127,10 @@ public abstract class ResourceCommunicationServiceTest<T extends BaseDto>
     // when
     mockRequestFail(HttpStatus.BAD_REQUEST);
     when(objectMapper.readValue(anyString(), eq(LocalizedMessageDto.class)))
-        .thenThrow(new IOException("test-exception"));
+        .thenThrow(new JsonParseException(null, "test-exception"));
 
     exception.expect(ServerException.class);
-    exception.expectMessage(containsString(MessageKeys.ERROR_IO));
+    exception.expectMessage(containsString("test-exception"));
 
     T instance = generateInstance();
     service.create(instance);
@@ -195,10 +196,10 @@ public abstract class ResourceCommunicationServiceTest<T extends BaseDto>
     // when
     mockRequestFail(HttpStatus.BAD_REQUEST);
     when(objectMapper.readValue(anyString(), eq(LocalizedMessageDto.class)))
-        .thenThrow(new IOException("test-exception"));
+        .thenThrow(new JsonParseException(null, "test-exception"));
 
     exception.expect(ServerException.class);
-    exception.expectMessage(containsString(MessageKeys.ERROR_IO));
+    exception.expectMessage(containsString("test-exception"));
 
     T instance = generateInstance();
     service.update(instance);

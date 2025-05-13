@@ -1,0 +1,14 @@
+The migration files for HAPI FHIR are generated using HAPI FHIR CLI Tool, dry-run option.
+
+How To:
+1. Get HAPI FHIR CLI of the target version (4.1.0: https://github.com/hapifhir/hapi-fhir/releases/tag/v4.1.0)
+2. Run OLMIS Distro with the OLD version, expose DB to your host machine.
+3. Run migration tool in dry-mode:
+```
+./hapi-fhir-cli migrate-database -r -d POSTGRES_9_4 -u "jdbc:postgresql://127.0.0.1:5432/open_lmis?currentSchema=hapifhir" -n "postgres" -p "p@ssw0rd" -no-column-shrink -f V4_0_0 -t V4_1_0
+```
+4. The console will contain the SQL to use as migration script.
+
+Known issues:
+1. I had to adjust some column names as the script didn't generate them correctly
+(ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks contained the name change that was not visible in the result SQL)

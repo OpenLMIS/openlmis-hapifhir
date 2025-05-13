@@ -18,8 +18,8 @@ package org.openlmis.hapifhir.web;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.any;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -48,13 +48,8 @@ public class LocationResourceIntegrationTest extends BaseResourceIntegrationTest
   public void shouldDenyAccessForUserRequests() {
     mockAccess(USER_AUTHENTICATION, USER_ACCESS_TOKEN);
 
-    restAssured
-        .given()
-        .header(HttpHeaders.AUTHORIZATION, getUserTokenHeader())
-        .when()
-        .get(RESOURCE_URL)
-        .then()
-        .statusCode(HttpStatus.SC_UNAUTHORIZED)
+    restAssured.given().header(HttpHeaders.AUTHORIZATION, getUserTokenHeader()).when()
+        .get(RESOURCE_URL).then().statusCode(HttpStatus.SC_UNAUTHORIZED)
         .body("issue.diagnostics", hasItem("Incorrect authorization"));
   }
 
@@ -62,13 +57,9 @@ public class LocationResourceIntegrationTest extends BaseResourceIntegrationTest
   public void shouldAllowAccessForServiceRequests() {
     mockAccess(CLIENT_AUTHENTICATION, CLIENT_ACCESS_TOKEN);
 
-    ValidatableResponse response = restAssured
-        .given()
-        .header(HttpHeaders.AUTHORIZATION, getClientTokenHeader())
-        .when()
-        .get(RESOURCE_URL)
-        .then()
-        .statusCode(HttpStatus.SC_OK);
+    ValidatableResponse response =
+        restAssured.given().header(HttpHeaders.AUTHORIZATION, getClientTokenHeader()).when()
+            .get(RESOURCE_URL).then().statusCode(HttpStatus.SC_OK);
 
     assertEntry(response);
   }
@@ -77,20 +68,15 @@ public class LocationResourceIntegrationTest extends BaseResourceIntegrationTest
   public void shouldAllowAccessForApiKeyRequests() {
     mockAccess(API_KEY_AUTHENTICATION, API_KEY_ACCESS_TOKEN);
 
-    ValidatableResponse response = restAssured
-        .given()
-        .header(HttpHeaders.AUTHORIZATION, getApiKeyTokenHeader())
-        .when()
-        .get(RESOURCE_URL)
-        .then()
-        .statusCode(HttpStatus.SC_OK);
+    ValidatableResponse response =
+        restAssured.given().header(HttpHeaders.AUTHORIZATION, getApiKeyTokenHeader()).when()
+            .get(RESOURCE_URL).then().statusCode(HttpStatus.SC_OK);
 
     assertEntry(response);
   }
 
   private void assertEntry(ValidatableResponse response) {
-    response
-        .body("entry", hasSize(1))
+    response.body("entry", hasSize(1))
         .body("entry[0].resource.resourceType", is(LOCATION.getResourceType().name()))
         .body("entry[0].resource.id", is(LOCATION.getId()));
   }
