@@ -85,6 +85,7 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
     http
         .authorizeRequests()
         .antMatchers(
+            "/actuator/health",
             "/hapifhir",
             "/webjars/**",
             "/hapifhir/webjars/**",
