@@ -1,9 +1,17 @@
 {
   "service": {
     "Name": "hapifhir",
+    "Id": "hapifhir-service",
     "Port": 8080,
-    "Tags": ["openlmis-service"]
+    "Tags": ["openlmis-service"],
+    "check": {
+      "interval": "10s",
+      "http": "http://HOST:PORT/actuator/health",
+      "timeout": "5s",
+      "deregisterCriticalServiceAfter": "10m"
+    }
   },
+  "raml": "/consul/api-definition.yaml",
   "path": [
     "hapifhir",
     "hapifhir/<all>",

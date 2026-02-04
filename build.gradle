@@ -32,6 +32,7 @@ repositories {
 }
 
 dependencies {
+    compile "org.springframework.boot:spring-boot-starter-actuator"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.postgresql:postgresql:42.6.2"
@@ -261,7 +262,7 @@ apply from: "registration.gradle"
 assemble {
     dependsOn ramlToHtml
     dependsOn copyRamlHtmlToBuild
-    dependsOn copyConsulRegistrationToBuild
+    dependsOn prepareConsulBuild
     dependsOn jacocoTestReport
 }
 
@@ -269,7 +270,7 @@ check {
     dependsOn ramlToHtml
     dependsOn copyRamlHtmlToBuild
     dependsOn integrationTest
-    dependsOn copyConsulRegistrationToBuild
+    dependsOn prepareConsulBuild
 }
 
 build {
