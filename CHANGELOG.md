@@ -2,6 +2,7 @@ Upcoming Version / (WIP)
 ==================
 
 Improvements:
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Migrated the SonarCloud analysis to Java 21 by running it through the SonarQube scan action instead of the Gradle plugin, and removed the now-unused Gradle sonar plugin and configuration.
 * Stabilized consul registration and health checks
 
 2.1.0 / 2025-11-27
