@@ -88,7 +88,8 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
             "/hapifhir",
             "/webjars/**",
             "/hapifhir/webjars/**",
-            "/hapifhir/docs/**"
+            "/hapifhir/docs/**",
+            "/actuator/prometheus"
         ).permitAll()
         .antMatchers("/**").fullyAuthenticated();
   }
