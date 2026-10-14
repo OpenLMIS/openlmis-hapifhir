@@ -1,6 +1,9 @@
 2.3.0-SNAPSHOT (WIP)
 ==================
 
+Bug fixes:
+* [OLMIS-8405](https://openlmis.atlassian.net/browse/OLMIS-8405): A service whose health check fails stays registered in Consul. Consul no longer removes it after 10 minutes in the critical state. The service registers only once, at startup, so after a removal nginx answered HTTP 502 for it until the container was restarted, even when the service itself had recovered. The health check keeps running and still reports the critical state.
+
 2.2.0 / 2026-09-28
 ==================
 
